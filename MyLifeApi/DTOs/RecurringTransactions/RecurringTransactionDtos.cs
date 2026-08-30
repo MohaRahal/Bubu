@@ -9,7 +9,7 @@ public sealed record RecurringTransactionRequest(
     ulong? CategoryId,
     TransactionType TransactionType,
     [Required, StringLength(200)] string Description,
-    [Range(typeof(decimal), "0.01", "999999999999.99")] decimal Amount,
+    [Range(typeof(decimal), "0.01", "999999999999.99", ParseLimitsInInvariantCulture = true)] decimal Amount,
     RecurrenceFrequency Frequency,
     DateOnly StartDate,
     DateOnly? EndDate,

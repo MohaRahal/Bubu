@@ -136,12 +136,19 @@ export function ProfilePage() {
     <div className={styles.page}>
       <header className={styles.heading}>
         <div>
-          <span><Sparkles size={14} /> SEU ESPAÇO</span>
+          <span>
+            <Sparkles size={14} /> SEU ESPAÇO
+          </span>
           <h1>Perfil e preferências</h1>
           <p>Mantenha suas informações atualizadas e sua conta protegida.</p>
         </div>
         {profile?.createdAt && (
-          <small><CalendarDays size={15} /> Com o Bubu desde {new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date(profile.createdAt))}</small>
+          <small>
+            <CalendarDays size={15} /> Com o Bubu desde{' '}
+            {new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(
+              new Date(profile.createdAt),
+            )}
+          </small>
         )}
       </header>
 
@@ -149,39 +156,85 @@ export function ProfilePage() {
         <aside className={styles.identityCard}>
           <div className={styles.avatarFrame}>
             <span />
-            <img src={avatarPreview} alt={`Avatar de ${form.name || 'usuário'}`} onError={(event) => { event.currentTarget.src = bubuImage }} />
+            <img
+              src={avatarPreview}
+              alt={`Avatar de ${form.name || 'usuário'}`}
+              onError={(event) => {
+                event.currentTarget.src = bubuImage
+              }}
+            />
           </div>
-          <span className={styles.activeBadge}><i /> Conta ativa</span>
+          <span className={styles.activeBadge}>
+            <i /> Conta ativa
+          </span>
           <h2>{form.name || 'Seu nome'}</h2>
           <p>{form.email || 'seu@email.com'}</p>
           <div className={styles.bubuNote}>
             <Sparkles size={17} />
-            <span><strong>Dica do Bubu</strong>Use uma foto que faça este espaço parecer ainda mais seu.</span>
+            <span>
+              <strong>Dica do Bubu</strong>Use uma foto que faça este espaço parecer ainda mais seu.
+            </span>
           </div>
         </aside>
 
         <div className={styles.formsColumn}>
           <form className={styles.formCard} onSubmit={handleProfileSubmit}>
             <header>
-              <span><UserRound size={20} /></span>
-              <div><h2>Informações pessoais</h2><p>Os dados usados para identificar sua conta.</p></div>
+              <span>
+                <UserRound size={20} />
+              </span>
+              <div>
+                <h2>Informações pessoais</h2>
+                <p>Os dados usados para identificar sua conta.</p>
+              </div>
             </header>
 
             <div className={styles.fieldsGrid}>
               <label>
                 <span>Nome completo</span>
-                <div><UserRound size={17} /><input name="name" value={form.name} onChange={handleFieldChange} minLength={2} maxLength={120} required /></div>
+                <div>
+                  <UserRound size={17} />
+                  <input
+                    name="name"
+                    value={form.name}
+                    onChange={handleFieldChange}
+                    minLength={2}
+                    maxLength={120}
+                    required
+                  />
+                </div>
               </label>
               <label>
                 <span>E-mail</span>
-                <div><Mail size={17} /><input name="email" type="email" value={form.email} onChange={handleFieldChange} maxLength={255} required /></div>
+                <div>
+                  <Mail size={17} />
+                  <input
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleFieldChange}
+                    maxLength={255}
+                    required
+                  />
+                </div>
               </label>
               <label>
                 <span>Data de nascimento</span>
-                <div><CalendarDays size={17} /><input name="birthDate" type="date" value={form.birthDate} max={new Date().toISOString().slice(0, 10)} onChange={handleFieldChange} /></div>
+                <div>
+                  <CalendarDays size={17} />
+                  <input
+                    name="birthDate"
+                    type="date"
+                    value={form.birthDate}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={handleFieldChange}
+                  />
+                </div>
               </label>
               <fieldset className={styles.avatarPicker}>
-                <legend><Image size={16} /> Escolha seu Bubu</legend>
+                <legend>
+                  <Image size={16} /> Escolha seu Bubu
+                </legend>
                 <div>
                   {avatars.map((avatar) => (
                     <button
@@ -194,9 +247,15 @@ export function ProfilePage() {
                         setProfileMessage(null)
                       }}
                     >
-                      <span><img src={avatar.url} alt="" /></span>
+                      <span>
+                        <img src={avatar.url} alt="" />
+                      </span>
                       <strong>{avatar.name}</strong>
-                      {form.avatarKey === avatar.key && <i><Check size={13} /></i>}
+                      {form.avatarKey === avatar.key && (
+                        <i>
+                          <Check size={13} />
+                        </i>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -204,27 +263,66 @@ export function ProfilePage() {
               </fieldset>
             </div>
 
-            <FormFooter message={profileMessage} isLoading={isSaving} loadingText="Salvando..." buttonText="Salvar alterações" icon={Save} />
+            <FormFooter
+              message={profileMessage}
+              isLoading={isSaving}
+              loadingText="Salvando..."
+              buttonText="Salvar alterações"
+              icon={Save}
+            />
           </form>
 
           <form className={styles.formCard} onSubmit={handlePasswordSubmit}>
             <header>
-              <span><ShieldCheck size={20} /></span>
-              <div><h2>Segurança</h2><p>Troque sua senha sempre que precisar.</p></div>
+              <span>
+                <ShieldCheck size={20} />
+              </span>
+              <div>
+                <h2>Segurança</h2>
+                <p>Troque sua senha sempre que precisar.</p>
+              </div>
             </header>
 
             <div className={styles.passwordGrid}>
-              <PasswordField label="Senha atual" name="currentPassword" value={passwordForm.currentPassword} onChange={handlePasswordChange} visible={showPasswords} />
-              <PasswordField label="Nova senha" name="newPassword" value={passwordForm.newPassword} onChange={handlePasswordChange} visible={showPasswords} />
-              <PasswordField label="Confirmar nova senha" name="confirmPassword" value={passwordForm.confirmPassword} onChange={handlePasswordChange} visible={showPasswords} />
+              <PasswordField
+                label="Senha atual"
+                name="currentPassword"
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordChange}
+                visible={showPasswords}
+              />
+              <PasswordField
+                label="Nova senha"
+                name="newPassword"
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+                visible={showPasswords}
+              />
+              <PasswordField
+                label="Confirmar nova senha"
+                name="confirmPassword"
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordChange}
+                visible={showPasswords}
+              />
             </div>
 
-            <button className={styles.visibilityButton} type="button" onClick={() => setShowPasswords((current) => !current)}>
+            <button
+              className={styles.visibilityButton}
+              type="button"
+              onClick={() => setShowPasswords((current) => !current)}
+            >
               {showPasswords ? <EyeOff size={16} /> : <Eye size={16} />}
               {showPasswords ? 'Ocultar senhas' : 'Mostrar senhas'}
             </button>
 
-            <FormFooter message={passwordMessage} isLoading={isChangingPassword} loadingText="Alterando..." buttonText="Alterar senha" icon={KeyRound} />
+            <FormFooter
+              message={passwordMessage}
+              isLoading={isChangingPassword}
+              loadingText="Alterando..."
+              buttonText="Alterar senha"
+              icon={KeyRound}
+            />
           </form>
         </div>
       </div>
@@ -236,7 +334,19 @@ function PasswordField({ label, name, value, onChange, visible }) {
   return (
     <label>
       <span>{label}</span>
-      <div><KeyRound size={17} /><input name={name} type={visible ? 'text' : 'password'} value={value} onChange={onChange} minLength={8} maxLength={100} autoComplete={name === 'currentPassword' ? 'current-password' : 'new-password'} required /></div>
+      <div>
+        <KeyRound size={17} />
+        <input
+          name={name}
+          type={visible ? 'text' : 'password'}
+          value={value}
+          onChange={onChange}
+          minLength={8}
+          maxLength={100}
+          autoComplete={name === 'currentPassword' ? 'current-password' : 'new-password'}
+          required
+        />
+      </div>
     </label>
   )
 }
@@ -244,8 +354,15 @@ function PasswordField({ label, name, value, onChange, visible }) {
 function FormFooter({ message, isLoading, loadingText, buttonText, icon: Icon }) {
   return (
     <footer className={styles.formFooter}>
-      <div className={message?.type === 'error' ? styles.errorMessage : styles.successMessage} role={message ? 'status' : undefined}>
-        {message && <><Check size={15} /> {message.text}</>}
+      <div
+        className={message?.type === 'error' ? styles.errorMessage : styles.successMessage}
+        role={message ? 'status' : undefined}
+      >
+        {message && (
+          <>
+            <Check size={15} /> {message.text}
+          </>
+        )}
       </div>
       <button type="submit" disabled={isLoading}>
         {isLoading ? <LoaderCircle className={styles.spinner} size={17} /> : <Icon size={17} />}

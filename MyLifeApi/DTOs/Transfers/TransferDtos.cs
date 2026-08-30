@@ -7,7 +7,7 @@ public sealed record TransferRequest(
     ulong UserId,
     ulong FromAccountId,
     ulong ToAccountId,
-    [Range(typeof(decimal), "0.01", "999999999999.99")] decimal Amount,
+    [Range(typeof(decimal), "0.01", "999999999999.99", ParseLimitsInInvariantCulture = true)] decimal Amount,
     DateTime TransferDate,
     [StringLength(200)] string? Description,
     TransactionStatus Status = TransactionStatus.Completed);

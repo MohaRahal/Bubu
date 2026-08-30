@@ -25,6 +25,7 @@ public sealed record MyDayActivityResponse(
     DateTime? EndedAt,
     uint? DurationSeconds,
     string Status,
+    bool IsPaused,
     string? CategoryName,
     string? CategoryColor);
 

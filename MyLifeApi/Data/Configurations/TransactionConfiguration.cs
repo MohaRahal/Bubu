@@ -37,5 +37,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.HasIndex(transaction => new { transaction.AccountId, transaction.TransactionDate }).HasDatabaseName("idx_transactions_account_date");
         builder.HasIndex(transaction => transaction.CategoryId).HasDatabaseName("idx_transactions_category");
         builder.HasIndex(transaction => transaction.RecurringTransactionId).HasDatabaseName("idx_transactions_recurring");
+        builder.HasIndex(transaction => new { transaction.RecurringTransactionId, transaction.TransactionDate })
+            .IsUnique()
+            .HasDatabaseName("uq_transactions_recurring_date");
     }
 }

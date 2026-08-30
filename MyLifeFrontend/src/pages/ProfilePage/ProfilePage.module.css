@@ -1,64 +1,493 @@
-.page { color: #68706b; }
-.heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin-bottom: 28px; }
-.heading > div > span { display: inline-flex; align-items: center; gap: .4rem; color: #70c52f; font-size: .62rem; font-weight: 850; letter-spacing: .14em; }
-.heading h1 { margin: 8px 0 7px; color: #183d3b; font-size: clamp(2.25rem,4vw,4rem); font-weight: 650; line-height: 1; letter-spacing: -.055em; }
-.heading p { margin: 0; color: #8a918c; font-size: .88rem; }
-.heading > small { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .5rem; padding: .65rem .85rem; border: 1px solid #e5e9e5; border-radius: 10px; color: #818984; background: #fff; font-size: .66rem; text-transform: capitalize; }
-.profileGrid { display: grid; grid-template-columns: minmax(250px,320px) minmax(0,1fr); align-items: start; gap: 14px; }
-.identityCard, .formCard { border: 1px solid #e5e9e5; border-radius: 16px; background: #fff; }
-.identityCard { position: sticky; top: 92px; overflow: hidden; padding: 28px 24px 22px; text-align: center; }
-.identityCard::before { position: absolute; top: 0; right: 0; left: 0; height: 105px; content: ''; background: radial-gradient(circle at 25% 30%,rgba(199,255,56,.75),transparent 28%),linear-gradient(135deg,#eff9dc,#f8fbf4); }
-.avatarFrame { position: relative; display: grid; width: 126px; height: 126px; margin: 12px auto 16px; place-items: center; border: 6px solid #fff; border-radius: 40px; background: #eefa98; box-shadow: 0 12px 32px rgba(24,61,59,.14); }
-.avatarFrame > span { position: absolute; inset: 6px; border: 1px dashed rgba(24,61,59,.2); border-radius: 30px; }
-.avatarFrame img { position: relative; width: 108px; height: 108px; object-fit: contain; border-radius: 28px; }
-.activeBadge { position: relative; display: inline-flex; align-items: center; gap: .38rem; padding: .32rem .58rem; border-radius: 999px; color: #4b8d28; background: #eff8e5; font-size: .58rem; font-weight: 800; }
-.activeBadge i { width: 6px; height: 6px; border-radius: 50%; background: #70c52f; box-shadow: 0 0 0 3px rgba(112,197,47,.16); }
-.identityCard h2 { position: relative; margin: 13px 0 2px; color: #183d3b; font-size: 1.35rem; letter-spacing: -.035em; }
-.identityCard > p { position: relative; overflow: hidden; margin: 0; color: #959c97; font-size: .7rem; text-overflow: ellipsis; }
-.bubuNote { display: flex; align-items: flex-start; gap: .6rem; margin-top: 24px; padding: 14px; border-radius: 12px; color: #5f7e34; background: #f5faeb; text-align: left; }
-.bubuNote svg { flex: 0 0 auto; margin-top: 2px; color: #70c52f; }
-.bubuNote span { font-size: .62rem; line-height: 1.5; }
-.bubuNote strong { display: block; color: #183d3b; font-size: .64rem; }
-.formsColumn { display: grid; gap: 14px; }
-.formCard { overflow: hidden; }
-.formCard > header { display: flex; align-items: center; gap: .8rem; padding: 20px 22px; border-bottom: 1px solid #e8ece8; }
-.formCard > header > span { display: grid; width: 40px; height: 40px; flex: 0 0 auto; place-items: center; border-radius: 11px; color: #183d3b; background: #c7ff38; }
-.formCard h2 { margin: 0; color: #183d3b; font-size: .9rem; }
-.formCard header p { margin: 3px 0 0; color: #999f9b; font-size: .63rem; }
-.fieldsGrid, .passwordGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; padding: 24px 22px; }
-.passwordGrid { grid-template-columns: repeat(3,minmax(0,1fr)); padding-bottom: 12px; }
-.fieldsGrid label, .passwordGrid label { display: grid; gap: 7px; min-width: 0; color: #69716c; font-size: .64rem; font-weight: 730; }
-.fieldsGrid label > div, .passwordGrid label > div { display: flex; min-height: 45px; align-items: center; gap: .6rem; padding: 0 13px; border: 1px solid #dfe4df; border-radius: 10px; background: #fafbfa; transition: border-color 180ms ease,box-shadow 180ms ease,background 180ms ease; }
-.fieldsGrid label > div:focus-within, .passwordGrid label > div:focus-within { border-color: #8dcd53; background: #fff; box-shadow: 0 0 0 4px rgba(112,197,47,.1); }
-.fieldsGrid svg, .passwordGrid svg { flex: 0 0 auto; color: #a1a8a3; }
-.fieldsGrid input, .passwordGrid input { width: 100%; min-width: 0; border: 0; outline: 0; color: #183d3b; background: transparent; font-size: .72rem; }
-.fieldsGrid input::placeholder { color: #b1b7b3; }
-.avatarPicker { grid-column: 1/-1; min-width: 0; margin: 2px 0 0; padding: 0; border: 0; }
-.avatarPicker legend { display: flex; align-items: center; gap: .45rem; margin-bottom: 10px; padding: 0; color: #69716c; font-size: .64rem; font-weight: 730; }
-.avatarPicker legend svg { color: #70c52f; }
-.avatarPicker > div { display: grid; grid-template-columns: repeat(auto-fill,minmax(112px,1fr)); gap: 10px; }
-.avatarPicker button { position: relative; display: grid; min-width: 0; place-items: center; gap: 7px; padding: 11px 8px 9px; border: 1px solid #e0e5e0; border-radius: 13px; color: #747d77; background: #fafbfa; cursor: pointer; transition: transform 180ms ease,border-color 180ms ease,background 180ms ease,box-shadow 180ms ease; }
-.avatarPicker button:hover { border-color: #b8d99a; background: #f7fbea; transform: translateY(-2px); }
-.avatarPicker button > span { display: grid; width: 70px; height: 70px; place-items: center; border-radius: 20px; background: linear-gradient(145deg,#eefa98,#f7fbdc); }
-.avatarPicker img { width: 64px; height: 64px; object-fit: contain; }
-.avatarPicker strong { overflow: hidden; max-width: 100%; font-size: .61rem; text-overflow: ellipsis; white-space: nowrap; }
-.avatarPicker button > i { position: absolute; top: 8px; right: 8px; display: grid; width: 21px; height: 21px; place-items: center; border-radius: 50%; color: #183d3b; background: #c7ff38; box-shadow: 0 3px 10px rgba(112,197,47,.2); }
-.avatarPicker .selectedAvatar { border-color: #8dcd53; background: #f5faeb; box-shadow: 0 0 0 3px rgba(112,197,47,.1); }
-.avatarPicker > small { display: block; margin-top: 9px; color: #9ca39e; font-size: .57rem; font-weight: 500; }
-.visibilityButton { display: inline-flex; align-items: center; gap: .4rem; margin: 0 22px 16px; padding: 0; border: 0; color: #7b857e; background: transparent; font-size: .62rem; cursor: pointer; }
-.formFooter { display: flex; min-height: 70px; align-items: center; justify-content: space-between; gap: 1rem; padding: 12px 22px; border-top: 1px solid #e8ece8; background: #fbfcfb; }
-.formFooter > button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: .5rem; padding: 0 1rem; border: 0; border-radius: 10px; color: #183d3b; background: #c7ff38; box-shadow: inset 0 0 0 1px rgba(24,61,59,.08),0 5px 16px rgba(112,197,47,.14); font-size: .68rem; font-weight: 800; cursor: pointer; transition: transform 180ms ease,box-shadow 180ms ease; }
-.formFooter > button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(24,61,59,.08),0 9px 22px rgba(112,197,47,.22); }
-.formFooter > button:disabled { cursor: wait; opacity: .7; }
-.successMessage, .errorMessage { display: flex; align-items: center; gap: .4rem; color: #4b8d28; font-size: .64rem; }
-.errorMessage { color: #b45149; }
-.loadingState { display: grid; min-height: 500px; place-content: center; place-items: center; color: #7e8781; font-size: .7rem; }
-.loadingState img { width: 115px; height: 115px; object-fit: contain; animation: float 2s ease-in-out infinite; }
-.loadingState svg { margin: 10px 0 5px; color: #70c52f; animation: spin .8s linear infinite; }
-.spinner { animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes float { 50% { transform: translateY(-7px) rotate(2deg); } }
-@media (max-width: 1100px) { .profileGrid { grid-template-columns: 240px minmax(0,1fr); } .passwordGrid { grid-template-columns: 1fr; } }
-@media (max-width: 820px) { .heading { align-items: flex-start; flex-direction: column; gap: 16px; } .profileGrid { grid-template-columns: 1fr; } .identityCard { position: relative; top: auto; } }
-@media (max-width: 560px) { .heading h1 { font-size: 2.5rem; } .fieldsGrid { grid-template-columns: 1fr; } .formFooter { align-items: stretch; flex-direction: column; } .formFooter > button { width: 100%; } .successMessage, .errorMessage:empty { min-height: 0; } }
-@media (prefers-reduced-motion: reduce) { .loadingState img, .loadingState svg, .spinner { animation: none; } .formFooter > button, .avatarPicker button { transition: none; } }
+.page {
+  color: #68706b;
+}
+.heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 28px;
+}
+.heading > div > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #70c52f;
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+}
+.heading h1 {
+  margin: 8px 0 7px;
+  color: #183d3b;
+  font-size: clamp(2.25rem, 4vw, 4rem);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+.heading p {
+  margin: 0;
+  color: #8a918c;
+  font-size: 0.88rem;
+}
+.heading > small {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #e5e9e5;
+  border-radius: 10px;
+  color: #818984;
+  background: #fff;
+  font-size: 0.66rem;
+  text-transform: capitalize;
+}
+.profileGrid {
+  display: grid;
+  grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+.identityCard,
+.formCard {
+  border: 1px solid #e5e9e5;
+  border-radius: 16px;
+  background: #fff;
+}
+.identityCard {
+  position: sticky;
+  top: 92px;
+  overflow: hidden;
+  padding: 28px 24px 22px;
+  text-align: center;
+}
+.identityCard::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 105px;
+  content: '';
+  background:
+    radial-gradient(circle at 25% 30%, rgba(199, 255, 56, 0.75), transparent 28%),
+    linear-gradient(135deg, #eff9dc, #f8fbf4);
+}
+.avatarFrame {
+  position: relative;
+  display: grid;
+  width: 126px;
+  height: 126px;
+  margin: 12px auto 16px;
+  place-items: center;
+  border: 6px solid #fff;
+  border-radius: 40px;
+  background: #eefa98;
+  box-shadow: 0 12px 32px rgba(24, 61, 59, 0.14);
+}
+.avatarFrame > span {
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(24, 61, 59, 0.2);
+  border-radius: 30px;
+}
+.avatarFrame img {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  object-fit: contain;
+  border-radius: 28px;
+}
+.activeBadge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.32rem 0.58rem;
+  border-radius: 999px;
+  color: #4b8d28;
+  background: #eff8e5;
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+.activeBadge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #70c52f;
+  box-shadow: 0 0 0 3px rgba(112, 197, 47, 0.16);
+}
+.identityCard h2 {
+  position: relative;
+  margin: 13px 0 2px;
+  color: #183d3b;
+  font-size: 1.35rem;
+  letter-spacing: -0.035em;
+}
+.identityCard > p {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  color: #959c97;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+}
+.bubuNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 24px;
+  padding: 14px;
+  border-radius: 12px;
+  color: #5f7e34;
+  background: #f5faeb;
+  text-align: left;
+}
+.bubuNote svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #70c52f;
+}
+.bubuNote span {
+  font-size: 0.62rem;
+  line-height: 1.5;
+}
+.bubuNote strong {
+  display: block;
+  color: #183d3b;
+  font-size: 0.64rem;
+}
+.formsColumn {
+  display: grid;
+  gap: 14px;
+}
+.formCard {
+  overflow: hidden;
+}
+.formCard > header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 20px 22px;
+  border-bottom: 1px solid #e8ece8;
+}
+.formCard > header > span {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 11px;
+  color: #183d3b;
+  background: #c7ff38;
+}
+.formCard h2 {
+  margin: 0;
+  color: #183d3b;
+  font-size: 0.9rem;
+}
+.formCard header p {
+  margin: 3px 0 0;
+  color: #999f9b;
+  font-size: 0.63rem;
+}
+.fieldsGrid,
+.passwordGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 14px;
+  padding: 24px 22px;
+}
+.passwordGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-bottom: 12px;
+}
+.fieldsGrid label,
+.passwordGrid label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: #69716c;
+  font-size: 0.64rem;
+  font-weight: 730;
+}
+.fieldsGrid label > div,
+.passwordGrid label > div {
+  display: flex;
+  min-height: 45px;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 13px;
+  border: 1px solid #dfe4df;
+  border-radius: 10px;
+  background: #fafbfa;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+.fieldsGrid label > div:focus-within,
+.passwordGrid label > div:focus-within {
+  border-color: #8dcd53;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(112, 197, 47, 0.1);
+}
+.fieldsGrid svg,
+.passwordGrid svg {
+  flex: 0 0 auto;
+  color: #a1a8a3;
+}
+.fieldsGrid input,
+.passwordGrid input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #183d3b;
+  background: transparent;
+  font-size: 0.72rem;
+}
+.fieldsGrid input::placeholder {
+  color: #b1b7b3;
+}
+.avatarPicker {
+  grid-column: 1/-1;
+  min-width: 0;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+}
+.avatarPicker legend {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 10px;
+  padding: 0;
+  color: #69716c;
+  font-size: 0.64rem;
+  font-weight: 730;
+}
+.avatarPicker legend svg {
+  color: #70c52f;
+}
+.avatarPicker > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 10px;
+}
+.avatarPicker button {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  gap: 7px;
+  padding: 11px 8px 9px;
+  border: 1px solid #e0e5e0;
+  border-radius: 13px;
+  color: #747d77;
+  background: #fafbfa;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+.avatarPicker button:hover {
+  border-color: #b8d99a;
+  background: #f7fbea;
+  transform: translateY(-2px);
+}
+.avatarPicker button > span {
+  display: grid;
+  width: 70px;
+  height: 70px;
+  place-items: center;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #eefa98, #f7fbdc);
+}
+.avatarPicker img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+.avatarPicker strong {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 0.61rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.avatarPicker button > i {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 21px;
+  height: 21px;
+  place-items: center;
+  border-radius: 50%;
+  color: #183d3b;
+  background: #c7ff38;
+  box-shadow: 0 3px 10px rgba(112, 197, 47, 0.2);
+}
+.avatarPicker .selectedAvatar {
+  border-color: #8dcd53;
+  background: #f5faeb;
+  box-shadow: 0 0 0 3px rgba(112, 197, 47, 0.1);
+}
+.avatarPicker > small {
+  display: block;
+  margin-top: 9px;
+  color: #9ca39e;
+  font-size: 0.57rem;
+  font-weight: 500;
+}
+.visibilityButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 22px 16px;
+  padding: 0;
+  border: 0;
+  color: #7b857e;
+  background: transparent;
+  font-size: 0.62rem;
+  cursor: pointer;
+}
+.formFooter {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 12px 22px;
+  border-top: 1px solid #e8ece8;
+  background: #fbfcfb;
+}
+.formFooter > button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 10px;
+  color: #183d3b;
+  background: #c7ff38;
+  box-shadow:
+    inset 0 0 0 1px rgba(24, 61, 59, 0.08),
+    0 5px 16px rgba(112, 197, 47, 0.14);
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.formFooter > button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px rgba(24, 61, 59, 0.08),
+    0 9px 22px rgba(112, 197, 47, 0.22);
+}
+.formFooter > button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.successMessage,
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #4b8d28;
+  font-size: 0.64rem;
+}
+.errorMessage {
+  color: #b45149;
+}
+.loadingState {
+  display: grid;
+  min-height: 500px;
+  place-content: center;
+  place-items: center;
+  color: #7e8781;
+  font-size: 0.7rem;
+}
+.loadingState img {
+  width: 115px;
+  height: 115px;
+  object-fit: contain;
+  animation: float 2s ease-in-out infinite;
+}
+.loadingState svg {
+  margin: 10px 0 5px;
+  color: #70c52f;
+  animation: spin 0.8s linear infinite;
+}
+.spinner {
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes float {
+  50% {
+    transform: translateY(-7px) rotate(2deg);
+  }
+}
+@media (max-width: 1100px) {
+  .profileGrid {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .passwordGrid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 820px) {
+  .heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+  .identityCard {
+    position: relative;
+    top: auto;
+  }
+}
+@media (max-width: 560px) {
+  .heading h1 {
+    font-size: 2.5rem;
+  }
+  .fieldsGrid {
+    grid-template-columns: 1fr;
+  }
+  .formFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .formFooter > button {
+    width: 100%;
+  }
+  .successMessage,
+  .errorMessage:empty {
+    min-height: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loadingState img,
+  .loadingState svg,
+  .spinner {
+    animation: none;
+  }
+  .formFooter > button,
+  .avatarPicker button {
+    transition: none;
+  }
+}

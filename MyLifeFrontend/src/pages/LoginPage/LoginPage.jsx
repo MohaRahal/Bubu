@@ -1,14 +1,16 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router'
-import bubuLoading from '../../assets/bubu-3d.png'
 import { BrandMark } from '../../components/brand/BrandMark'
+import { BubuLoadingScreen } from '../../components/layout/BubuLoadingScreen'
 import { useAuth } from '../../hooks/useAuth'
 import styles from './LoginPage.module.css'
 
-const AuthMascot = lazy(() => import('../../components/auth/AuthMascot').then((module) => ({
-  default: module.AuthMascot,
-})))
+const AuthMascot = lazy(() =>
+  import('../../components/auth/AuthMascot').then((module) => ({
+    default: module.AuthMascot,
+  })),
+)
 
 export function LoginPage() {
   const location = useLocation()
@@ -62,13 +64,7 @@ export function LoginPage() {
   return (
     <main className={styles.page}>
       {isLoginComplete && (
-        <div className={styles.loginTransition} role="status" aria-live="polite">
-          <div className={styles.transitionGlow} aria-hidden="true" />
-          <img className={styles.transitionBubu} src={bubuLoading} alt="" />
-          <strong>Bem-vindo ao seu espaço.</strong>
-          <p>O Bubu está organizando tudo para você...</p>
-          <span className={styles.transitionProgress} aria-hidden="true"><i /></span>
-        </div>
+        <BubuLoadingScreen />
       )}
 
       <section className={styles.welcome} aria-label="Boas-vindas do Bubu">
@@ -81,10 +77,12 @@ export function LoginPage() {
 
         <div className={styles.welcomeCopy}>
           <span className={styles.eyebrow}>SEU CANTINHO ESTÁ AQUI</span>
-          <h1>Que bom ter você <em>de volta.</em></h1>
+          <h1>
+            Que bom ter você <em>de volta.</em>
+          </h1>
           <p>
-            Entre para organizar seus dias, acompanhar seus objetivos e cuidar
-            da sua vida financeira em um só lugar.
+            Entre para organizar seus dias, acompanhar seus objetivos e cuidar da sua vida
+            financeira em um só lugar.
           </p>
         </div>
 
@@ -169,7 +167,11 @@ export function LoginPage() {
               </div>
             </div>
 
-            {errorMessage && <p className={styles.formError} role="alert">{errorMessage}</p>}
+            {errorMessage && (
+              <p className={styles.formError} role="alert">
+                {errorMessage}
+              </p>
+            )}
 
             <button
               className={`${styles.submitButton} ${styles.loginButton}`}
@@ -191,8 +193,8 @@ export function LoginPage() {
         </div>
 
         <p className={styles.legal}>
-          Ao continuar, você concorda com nossos <a href="#termos">Termos</a> e
-          nossa <a href="#privacidade">Política de Privacidade</a>.
+          Ao continuar, você concorda com nossos <a href="#termos">Termos</a> e nossa{' '}
+          <a href="#privacidade">Política de Privacidade</a>.
         </p>
       </section>
     </main>

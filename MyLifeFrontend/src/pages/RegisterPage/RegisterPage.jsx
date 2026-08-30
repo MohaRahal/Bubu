@@ -17,9 +17,11 @@ import { createUser } from '../../services/usersApi'
 import authStyles from '../LoginPage/LoginPage.module.css'
 import styles from './RegisterPage.module.css'
 
-const AuthMascot = lazy(() => import('../../components/auth/AuthMascot').then((module) => ({
-  default: module.AuthMascot,
-})))
+const AuthMascot = lazy(() =>
+  import('../../components/auth/AuthMascot').then((module) => ({
+    default: module.AuthMascot,
+  })),
+)
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -96,10 +98,12 @@ export function RegisterPage() {
 
         <div className={authStyles.welcomeCopy}>
           <span className={authStyles.eyebrow}>COMECE DO SEU JEITO</span>
-          <h1>Um lugar para chamar de <em>seu.</em></h1>
+          <h1>
+            Um lugar para chamar de <em>seu.</em>
+          </h1>
           <p>
-            Crie sua conta e comece a transformar planos soltos em uma rotina
-            mais clara, leve e possível.
+            Crie sua conta e comece a transformar planos soltos em uma rotina mais clara, leve e
+            possível.
           </p>
         </div>
 
@@ -232,7 +236,9 @@ export function RegisterPage() {
                   <button
                     className={authStyles.passwordToggle}
                     type="button"
-                    aria-label={showPasswordConfirmation ? 'Ocultar confirmação' : 'Mostrar confirmação'}
+                    aria-label={
+                      showPasswordConfirmation ? 'Ocultar confirmação' : 'Mostrar confirmação'
+                    }
                     aria-pressed={showPasswordConfirmation}
                     onClick={() => setShowPasswordConfirmation((current) => !current)}
                   >
@@ -260,7 +266,9 @@ export function RegisterPage() {
             </label>
 
             {errorMessage && (
-              <p className={styles.formError} role="alert">{errorMessage}</p>
+              <p className={styles.formError} role="alert">
+                {errorMessage}
+              </p>
             )}
 
             <button

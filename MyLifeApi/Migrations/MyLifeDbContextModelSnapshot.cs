@@ -591,6 +591,10 @@ namespace MyLifeApi.Migrations
                     b.HasIndex("AccountId", "TransactionDate")
                         .HasDatabaseName("idx_transactions_account_date");
 
+                    b.HasIndex("RecurringTransactionId", "TransactionDate")
+                        .IsUnique()
+                        .HasDatabaseName("uq_transactions_recurring_date");
+
                     b.HasIndex("UserId", "TransactionDate")
                         .HasDatabaseName("idx_transactions_user_date");
 

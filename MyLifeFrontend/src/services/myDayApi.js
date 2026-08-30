@@ -43,4 +43,14 @@ async function runActivityAction(id, action) {
 
 export const completeActivity = (id) => runActivityAction(id, 'complete')
 export const startActivity = (id) => runActivityAction(id, 'start')
+export const pauseActivity = (id) => runActivityAction(id, 'pause')
 export const stopActivity = (id) => runActivityAction(id, 'stop')
+
+export async function deleteActivity(id) {
+  const response = await fetch(`${apiBaseUrl}/api/my-day/activities/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+
+  if (!response.ok) throw new Error(await readError(response, 'Não foi possível remover a atividade.'))
+}

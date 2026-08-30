@@ -19,7 +19,7 @@
 
 .optional {
   color: #969c98;
-  font-size: .72rem;
+  font-size: 0.72rem;
   font-weight: 650;
 }
 
@@ -30,16 +30,16 @@
 }
 
 .passwordGrid input {
-  font-size: .84rem;
+  font-size: 0.84rem;
 }
 
 .passwordHint {
   display: flex;
   align-items: center;
-  gap: .4rem;
+  gap: 0.4rem;
   margin: -7px 0 0;
   color: #6d756f;
-  font-size: .72rem;
+  font-size: 0.72rem;
 }
 
 .passwordHint svg {
@@ -64,12 +64,12 @@
 
 .formError {
   margin: 0;
-  padding: .8rem 1rem;
-  border: 1px solid rgba(188, 61, 50, .18);
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(188, 61, 50, 0.18);
   border-radius: 12px;
   color: #9f332c;
   background: #fff3f1;
-  font-size: .8rem;
+  font-size: 0.8rem;
   font-weight: 650;
   line-height: 1.45;
   animation: errorReveal 280ms ease-out both;
@@ -79,8 +79,11 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  transition: color 220ms ease, background 220ms ease, box-shadow 220ms ease,
-    transform 220ms cubic-bezier(.22, 1, .36, 1) !important;
+  transition:
+    color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 .createButton::before {
@@ -91,7 +94,7 @@
   width: 22%;
   height: 260%;
   content: '';
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .58), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.58), transparent);
   transform: rotate(22deg);
   animation: buttonShine 3.2s 1.2s ease-in-out infinite;
 }
@@ -105,12 +108,14 @@
   opacity: 0;
   background: #c7ff38;
   filter: blur(18px);
-  transform: scale(.25);
-  transition: opacity 280ms ease, transform 400ms cubic-bezier(.22, 1, .36, 1);
+  transform: scale(0.25);
+  transition:
+    opacity 280ms ease,
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .createButton:hover:not(:disabled) .buttonGlow {
-  opacity: .9;
+  opacity: 0.9;
   transform: scale(3.8);
 }
 
@@ -120,18 +125,18 @@
 }
 
 .createButton:active:not(:disabled) {
-  transform: translateY(0) scale(.985);
+  transform: translateY(0) scale(0.985);
 }
 
 .buttonLabel {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .6rem;
+  gap: 0.6rem;
 }
 
 .buttonArrow {
-  transition: transform 220ms cubic-bezier(.22, 1, .36, 1);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .createButton:hover:not(:disabled) .buttonArrow {
@@ -146,38 +151,60 @@
   color: #153d3b;
   border-color: #c7ff38;
   background: #c7ff38;
-  box-shadow: 0 0 0 6px rgba(199, 255, 56, .15), 0 18px 38px rgba(88, 157, 37, .25);
+  box-shadow:
+    0 0 0 6px rgba(199, 255, 56, 0.15),
+    0 18px 38px rgba(88, 157, 37, 0.25);
   cursor: default;
-  animation: successPulse 520ms cubic-bezier(.22, 1, .36, 1) both;
+  animation: successPulse 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255, 255, 255, .35);
+  border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spinner 700ms linear infinite;
 }
 
 @keyframes buttonShine {
-  0%, 60% { left: -35%; }
-  85%, 100% { left: 125%; }
+  0%,
+  60% {
+    left: -35%;
+  }
+  85%,
+  100% {
+    left: 125%;
+  }
 }
 
 @keyframes spinner {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes successPulse {
-  0% { transform: scale(.96); }
-  55% { transform: scale(1.025); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.96);
+  }
+  55% {
+    transform: scale(1.025);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes errorReveal {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 1180px) {

@@ -1,13 +1,13 @@
 import { Navigate, useLocation } from 'react-router'
 import { useAuth } from '../../hooks/useAuth'
-import styles from './ProtectedRoute.module.css'
+import { BubuLoadingScreen } from '../layout/BubuLoadingScreen'
 
 export function ProtectedRoute({ children }) {
   const location = useLocation()
   const { isLoading, user } = useAuth()
 
   if (isLoading) {
-    return <RouteLoading />
+    return <BubuLoadingScreen />
   }
 
   if (!user) {
@@ -17,11 +17,4 @@ export function ProtectedRoute({ children }) {
   return children
 }
 
-export function RouteLoading() {
-  return (
-    <main className={styles.loadingPage} aria-label="Verificando sua sessão">
-      <span className={styles.cloud} aria-hidden="true" />
-      <p>Preparando seu espaço...</p>
-    </main>
-  )
-}
+export { BubuLoadingScreen as RouteLoading }

@@ -7,7 +7,7 @@ public sealed record AccountRequest(
     ulong UserId,
     [Required, StringLength(100)] string Name,
     AccountType AccountType,
-    [Range(typeof(decimal), "-999999999999.99", "999999999999.99")] decimal InitialBalance = 0,
+    [Range(typeof(decimal), "-999999999999.99", "999999999999.99", ParseLimitsInInvariantCulture = true)] decimal InitialBalance = 0,
     bool IsActive = true);
 
 public sealed record AccountResponse(

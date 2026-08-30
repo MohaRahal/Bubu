@@ -8,7 +8,7 @@ public sealed record GoalRequest(
     [Required, StringLength(150)] string Title,
     string? Description,
     GoalType GoalType,
-    [Range(typeof(decimal), "0", "9999999999.99")] decimal? TargetValue,
+    [Range(typeof(decimal), "0", "9999999999.99", ParseLimitsInInvariantCulture = true)] decimal? TargetValue,
     [StringLength(30)] string? Unit,
     DateOnly? StartDate,
     DateOnly? TargetDate,

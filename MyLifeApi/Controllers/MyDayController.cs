@@ -39,6 +39,9 @@ public sealed class MyDayController(MyLifeDbContext db) : ControllerBase
                 activity.Status == ActivityStatus.Planned ? "planned" :
                 activity.Status == ActivityStatus.InProgress ? "in_progress" :
                 activity.Status == ActivityStatus.Completed ? "completed" : "cancelled",
+                activity.Status == ActivityStatus.Planned &&
+                activity.Source == ActivitySource.Timer &&
+                activity.DurationSeconds > 0,
                 activity.Category == null ? null : activity.Category.Name,
                 activity.Category == null ? null : activity.Category.Color))
             .ToListAsync(cancellationToken);
@@ -157,10 +160,35 @@ public sealed class MyDayController(MyLifeDbContext db) : ControllerBase
         if (anotherTimerIsRunning)
             return Conflict(new ProblemDetails { Title = "Finalize o cronômetro atual antes de iniciar outro." });
 
+        if (activity.Source != ActivitySource.Timer)
+            activity.DurationSeconds = 0;
+
         activity.StartedAt = DateTime.Now;
         activity.EndedAt = null;
-        activity.DurationSeconds = null;
         activity.Status = ActivityStatus.InProgress;
+        activity.Source = ActivitySource.Timer;
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Ok(await ToResponse(activity.Id, userId, cancellationToken));
+    }
+
+    [HttpPatch("activities/{id:long}/pause")]
+    public async Task<ActionResult<MyDayActivityResponse>> Pause(
+        ulong id,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+        var activity = await FindActivity(id, userId, cancellationToken);
+        if (activity is null) return NotFound();
+        if (activity.Status != ActivityStatus.InProgress || !activity.StartedAt.HasValue)
+            return BadRequest(new ProblemDetails { Title = "Esta atividade não possui um cronômetro para pausar." });
+
+        var now = DateTime.Now;
+        var elapsedSeconds = (uint)Math.Max(0, (now - activity.StartedAt.Value).TotalSeconds);
+        activity.DurationSeconds = checked((activity.DurationSeconds ?? 0) + elapsedSeconds);
+        activity.StartedAt = null;
+        activity.EndedAt = null;
+        activity.Status = ActivityStatus.Planned;
         activity.Source = ActivitySource.Timer;
         await db.SaveChangesAsync(cancellationToken);
 
@@ -179,13 +207,28 @@ public sealed class MyDayController(MyLifeDbContext db) : ControllerBase
             return BadRequest(new ProblemDetails { Title = "Esta atividade não possui um cronômetro ativo." });
 
         activity.EndedAt = DateTime.Now;
-        activity.DurationSeconds = (uint)Math.Max(
+        var elapsedSeconds = (uint)Math.Max(
             0,
             (activity.EndedAt.Value - activity.StartedAt.Value).TotalSeconds);
+        activity.DurationSeconds = checked((activity.DurationSeconds ?? 0) + elapsedSeconds);
         activity.Status = ActivityStatus.Completed;
         await db.SaveChangesAsync(cancellationToken);
 
         return Ok(await ToResponse(activity.Id, userId, cancellationToken));
+    }
+
+    [HttpDelete("activities/{id:long}")]
+    public async Task<IActionResult> Delete(
+        ulong id,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+        var activity = await FindActivity(id, userId, cancellationToken);
+        if (activity is null) return NotFound();
+
+        db.Activities.Remove(activity);
+        await db.SaveChangesAsync(cancellationToken);
+        return NoContent();
     }
 
     private bool TryGetUserId(out ulong userId)
@@ -220,6 +263,9 @@ public sealed class MyDayController(MyLifeDbContext db) : ControllerBase
                 activity.Status == ActivityStatus.Planned ? "planned" :
                 activity.Status == ActivityStatus.InProgress ? "in_progress" :
                 activity.Status == ActivityStatus.Completed ? "completed" : "cancelled",
+                activity.Status == ActivityStatus.Planned &&
+                activity.Source == ActivitySource.Timer &&
+                activity.DurationSeconds > 0,
                 activity.Category == null ? null : activity.Category.Name,
                 activity.Category == null ? null : activity.Category.Color))
             .SingleAsync(cancellationToken);

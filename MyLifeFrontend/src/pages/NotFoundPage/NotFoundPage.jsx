@@ -37,8 +37,8 @@ export function NotFoundPage() {
           <span className={styles.eyebrow}>OPA, UM DESVIO NO CAMINHO</span>
           <h1>Nem o Bubu encontrou essa página.</h1>
           <p>
-            Parece que este endereço mudou de lugar ou nunca existiu.
-            Está tudo bem — vamos voltar para uma parte conhecida.
+            Parece que este endereço mudou de lugar ou nunca existiu. Está tudo bem — vamos voltar
+            para uma parte conhecida.
           </p>
 
           <div className={styles.actions}>
@@ -46,7 +46,11 @@ export function NotFoundPage() {
               <Home size={18} />
               Voltar ao início
             </Link>
-            <button className={styles.backAction} type="button" onClick={() => window.history.back()}>
+            <button
+              className={styles.backAction}
+              type="button"
+              onClick={() => window.history.back()}
+            >
               <ArrowLeft size={17} />
               Página anterior
             </button>

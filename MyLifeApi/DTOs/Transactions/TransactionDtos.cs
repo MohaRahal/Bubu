@@ -10,7 +10,7 @@ public sealed record TransactionRequest(
     ulong? RecurringTransactionId,
     TransactionType TransactionType,
     [Required, StringLength(200)] string Description,
-    [Range(typeof(decimal), "0.01", "999999999999.99")] decimal Amount,
+    [Range(typeof(decimal), "0.01", "999999999999.99", ParseLimitsInInvariantCulture = true)] decimal Amount,
     DateOnly TransactionDate,
     TransactionStatus Status = TransactionStatus.Completed,
     string? Notes = null);

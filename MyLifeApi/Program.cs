@@ -31,6 +31,8 @@ builder.Services.AddControllers()
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<AuthTokenService>();
+builder.Services.AddScoped<RecurringTransactionProcessor>();
+builder.Services.AddHostedService<RecurringTransactionWorker>();
 builder.Services.AddSingleton<AvatarCatalogService>();
 builder.Services.AddOptions<JwtOptions>()
     .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
