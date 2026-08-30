@@ -1,0 +1,55 @@
+# Build do .NET
+bin/
+obj/
+artifacts/
+publish/
+
+# Visual Studio, Rider e VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Configurações locais e segredos
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+secrets.json
+
+# Certificados e chaves privadas
+*.pfx
+*.p12
+*.pem
+*.key
+certs/
+
+# Logs e arquivos temporários
+logs/
+*.log
+*.tmp
+*.temp
+*.cache
+
+# Testes e cobertura
+TestResults/
+coverage/
+coverage.*
+*.trx
+
+# Bancos locais
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini

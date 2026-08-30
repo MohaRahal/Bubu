@@ -1,0 +1,217 @@
+.page {
+  min-height: 100svh;
+}
+
+.formSide {
+  padding-top: 52px;
+  padding-bottom: 52px;
+}
+
+.formWrapper {
+  width: min(500px, 100%);
+  padding-block: 24px;
+}
+
+.form {
+  gap: 17px;
+  margin-top: 30px;
+}
+
+.optional {
+  color: #969c98;
+  font-size: .72rem;
+  font-weight: 650;
+}
+
+.passwordGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.passwordGrid input {
+  font-size: .84rem;
+}
+
+.passwordHint {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin: -7px 0 0;
+  color: #6d756f;
+  font-size: .72rem;
+}
+
+.passwordHint svg {
+  color: #589d25;
+}
+
+.terms {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.terms input {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.terms a {
+  color: #4f921f;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.formError {
+  margin: 0;
+  padding: .8rem 1rem;
+  border: 1px solid rgba(188, 61, 50, .18);
+  border-radius: 12px;
+  color: #9f332c;
+  background: #fff3f1;
+  font-size: .8rem;
+  font-weight: 650;
+  line-height: 1.45;
+  animation: errorReveal 280ms ease-out both;
+}
+
+.createButton {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: color 220ms ease, background 220ms ease, box-shadow 220ms ease,
+    transform 220ms cubic-bezier(.22, 1, .36, 1) !important;
+}
+
+.createButton::before {
+  position: absolute;
+  z-index: -1;
+  top: -80%;
+  left: -35%;
+  width: 22%;
+  height: 260%;
+  content: '';
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .58), transparent);
+  transform: rotate(22deg);
+  animation: buttonShine 3.2s 1.2s ease-in-out infinite;
+}
+
+.buttonGlow {
+  position: absolute;
+  z-index: -2;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  opacity: 0;
+  background: #c7ff38;
+  filter: blur(18px);
+  transform: scale(.25);
+  transition: opacity 280ms ease, transform 400ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.createButton:hover:not(:disabled) .buttonGlow {
+  opacity: .9;
+  transform: scale(3.8);
+}
+
+.createButton:hover:not(:disabled) {
+  background: #c7ff38;
+  transform: translateY(-3px) scale(1.015);
+}
+
+.createButton:active:not(:disabled) {
+  transform: translateY(0) scale(.985);
+}
+
+.buttonLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+}
+
+.buttonArrow {
+  transition: transform 220ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.createButton:hover:not(:disabled) .buttonArrow {
+  transform: translateX(5px) rotate(-8deg);
+}
+
+.createButton:disabled {
+  cursor: wait;
+}
+
+.createButton.success {
+  color: #153d3b;
+  border-color: #c7ff38;
+  background: #c7ff38;
+  box-shadow: 0 0 0 6px rgba(199, 255, 56, .15), 0 18px 38px rgba(88, 157, 37, .25);
+  cursor: default;
+  animation: successPulse 520ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, .35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spinner 700ms linear infinite;
+}
+
+@keyframes buttonShine {
+  0%, 60% { left: -35%; }
+  85%, 100% { left: 125%; }
+}
+
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes successPulse {
+  0% { transform: scale(.96); }
+  55% { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+
+@keyframes errorReveal {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1180px) {
+  .passwordGrid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+}
+
+@media (max-width: 820px) {
+  .formSide {
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .formSide {
+    padding-top: 22px;
+    padding-bottom: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .createButton::before,
+  .createButton.success,
+  .spinner,
+  .formError {
+    animation: none;
+  }
+
+  .buttonGlow,
+  .buttonArrow,
+  .createButton {
+    transition: none !important;
+  }
+}
