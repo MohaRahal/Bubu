@@ -14,6 +14,10 @@ export default defineConfig({
         target: 'http://localhost:5261',
         changeOrigin: true,
       },
+      '/avatars': {
+        target: 'http://localhost:5261',
+        changeOrigin: true,
+      },
     },
   },
 })

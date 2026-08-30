@@ -21,7 +21,7 @@ import {
   WalletCards,
   X,
 } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import {
   Area,
   AreaChart,
@@ -32,13 +32,16 @@ import {
   YAxis,
 } from 'recharts'
 import bubuIcon from '../../assets/bubu-3d.png'
+import { LogoutModal } from '../../components/dashboard/LogoutModal'
 import { useAuth } from '../../hooks/useAuth'
+import { ProfilePage } from '../ProfilePage/ProfilePage'
+import { MyDayPage } from '../MyDayPage/MyDayPage'
 import { getDashboard } from '../../services/authApi'
 import styles from './DashboardPage.module.css'
 
 const menuItems = [
-  { label: 'Visão geral', icon: LayoutDashboard, active: true },
-  { label: 'Meu dia', icon: CalendarCheck },
+  { label: 'Visão geral', icon: LayoutDashboard, path: '/dashboard' },
+  { label: 'Meu dia', icon: CalendarCheck, path: '/dashboard/meu-dia' },
   { label: 'Atividades', icon: Activity },
   { label: 'Objetivos', icon: Target },
   { label: 'Finanças', icon: WalletCards },
@@ -103,10 +106,16 @@ function ChartTooltip({ active, payload, label, metric }) {
 
 export function DashboardPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { logout, user } = useAuth()
+  const isProfileView = location.pathname === '/dashboard/perfil'
+  const isMyDayView = location.pathname === '/dashboard/meu-dia'
+  const isOverviewView = !isProfileView && !isMyDayView
   const [dashboard, setDashboard] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
   const [chartMetric, setChartMetric] = useState('focus')
@@ -114,14 +123,18 @@ export function DashboardPage() {
 
   useEffect(() => {
     const previousTitle = document.title
-    document.title = 'Dashboard | Bubu'
+    document.title = isProfileView
+      ? 'Meu perfil | Bubu'
+      : isMyDayView ? 'Meu dia | Bubu' : 'Dashboard | Bubu'
 
     return () => {
       document.title = previousTitle
     }
-  }, [])
+  }, [isMyDayView, isProfileView])
 
   useEffect(() => {
+    if (!isOverviewView) return undefined
+
     const controller = new AbortController()
     let isCurrentRequest = true
 
@@ -142,7 +155,7 @@ export function DashboardPage() {
       isCurrentRequest = false
       controller.abort()
     }
-  }, [reloadKey])
+  }, [isOverviewView, reloadKey])
 
   const chartData = useMemo(() => dashboard?.lastSevenDays.map((point) => ({
     ...point,
@@ -152,14 +165,27 @@ export function DashboardPage() {
 
   async function handleLogout() {
     setIsLoggingOut(true)
+    setLogoutError('')
 
     try {
       await logout()
       navigate('/login', { replace: true })
     } catch (error) {
-      setErrorMessage(error.message)
+      setLogoutError(error.message)
       setIsLoggingOut(false)
     }
+  }
+
+  function openLogoutModal() {
+    setLogoutError('')
+    setIsMenuOpen(false)
+    setIsLogoutModalOpen(true)
+  }
+
+  function closeLogoutModal() {
+    if (isLoggingOut) return
+    setLogoutError('')
+    setIsLogoutModalOpen(false)
   }
 
   function handleRetry() {
@@ -170,6 +196,15 @@ export function DashboardPage() {
 
   return (
     <div className={styles.shell}>
+      {isLogoutModalOpen && (
+        <LogoutModal
+          isLoading={isLoggingOut}
+          errorMessage={logoutError}
+          onConfirm={handleLogout}
+          onStay={closeLogoutModal}
+        />
+      )}
+
       {isMenuOpen && (
         <button
           className={styles.menuBackdrop}
@@ -192,32 +227,41 @@ export function DashboardPage() {
 
         <nav className={styles.navigation} aria-label="Menu do dashboard">
           <span>SEU ESPAÇO</span>
-          {menuItems.map(({ label, icon: Icon, active }) => (
-            <button
-              className={active ? styles.activeNav : undefined}
-              type="button"
-              key={label}
-              disabled={!active}
-              title={!active ? 'Disponível em breve' : undefined}
-            >
-              <Icon size={18} />
-              {label}
-              {active && <i />}
-            </button>
-          ))}
+          {menuItems.map(({ label, icon: Icon, path }) => {
+            const isActive = location.pathname === path || (path === '/dashboard' && location.pathname === '/dashboard/')
+
+            return (
+              <button
+                className={isActive ? styles.activeNav : undefined}
+                type="button"
+                key={label}
+                disabled={!path}
+                title={!path ? 'Disponível em breve' : undefined}
+                onClick={() => {
+                  navigate(path)
+                  setIsMenuOpen(false)
+                }}
+              >
+                <Icon size={18} />
+                {label}
+                {isActive && <i />}
+              </button>
+            )
+          })}
         </nav>
 
         <div className={styles.sidebarBottom}>
-          <button type="button" disabled title="Disponível em breve">
-            <Settings size={18} /> Configurações
+          <button className={isProfileView ? styles.profileNav : undefined} type="button" onClick={() => { navigate('/dashboard/perfil'); setIsMenuOpen(false) }}>
+            <Settings size={18} /> Meu perfil
+            {isProfileView && <i />}
           </button>
-          <button className={styles.logoutButton} type="button" onClick={handleLogout} disabled={isLoggingOut}>
-            <LogOut size={18} /> {isLoggingOut ? 'Saindo...' : 'Sair da conta'}
+          <button className={styles.logoutButton} type="button" onClick={openLogoutModal}>
+            <LogOut size={18} /> Sair da conta
           </button>
-          <div className={styles.sidebarProfile}>
-            <span>{user.name.slice(0, 1).toUpperCase()}</span>
+          <button className={styles.sidebarProfile} type="button" onClick={() => { navigate('/dashboard/perfil'); setIsMenuOpen(false) }} aria-label="Abrir meu perfil">
+            <span className={user.avatarUrl ? styles.selectedUserAvatar : undefined}>{user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : user.name.slice(0, 1).toUpperCase()}</span>
             <div><strong>{user.name}</strong><small>{user.email}</small></div>
-          </div>
+          </button>
         </div>
       </aside>
 
@@ -226,17 +270,24 @@ export function DashboardPage() {
           <button className={styles.mobileMenu} type="button" aria-label="Abrir menu" onClick={() => setIsMenuOpen(true)}>
             <Menu size={21} />
           </button>
-          <div><LayoutDashboard size={17} /><span>Visão geral</span></div>
+          <div>
+            {isProfileView ? <Settings size={17} /> : isMyDayView ? <CalendarCheck size={17} /> : <LayoutDashboard size={17} />}
+            <span>{isProfileView ? 'Meu perfil' : isMyDayView ? 'Meu dia' : 'Visão geral'}</span>
+          </div>
           <button className={styles.collapseButton} type="button" disabled aria-label="Recolher menu">
             <PanelLeftClose size={18} />
           </button>
-          <div className={styles.topProfile}>
-            <span>{user.name.slice(0, 1).toUpperCase()}</span>
+          <button className={styles.topProfile} type="button" onClick={() => navigate('/dashboard/perfil')} aria-label="Abrir meu perfil">
+            <span className={user.avatarUrl ? styles.selectedUserAvatar : undefined}>{user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : user.name.slice(0, 1).toUpperCase()}</span>
             <strong>{user.name.split(' ')[0]}</strong>
-          </div>
+          </button>
         </header>
 
         <div className={styles.dashboardContent}>
+          {isProfileView && <ProfilePage />}
+          {isMyDayView && <MyDayPage />}
+          {isOverviewView && (
+            <>
           <section className={styles.welcome}>
             <div>
               <span className={styles.eyebrow}>SUA VIDA, EM UM SÓ LUGAR</span>
@@ -347,6 +398,8 @@ export function DashboardPage() {
                     ))}
                 </div>
               </section>
+            </>
+          )}
             </>
           )}
         </div>

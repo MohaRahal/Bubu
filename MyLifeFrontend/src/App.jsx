@@ -17,7 +17,7 @@ function App() {
       <Route path="login" element={<LoginPage />} />
       <Route path="cadastro" element={<RegisterPage />} />
       <Route
-        path="dashboard"
+        path="dashboard/*"
         element={(
           <ProtectedRoute>
             <Suspense fallback={<RouteLoading />}>

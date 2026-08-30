@@ -41,6 +41,9 @@ export function AuthProvider({ children }) {
       await authApi.logout()
       setUser(null)
     },
+    updateUser(updatedUser) {
+      setUser((currentUser) => currentUser ? { ...currentUser, ...updatedUser } : updatedUser)
+    },
   }), [isLoading, user])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
