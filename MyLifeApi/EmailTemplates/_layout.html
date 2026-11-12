@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Bubu</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fustat:wght@400;500;600;700;800&display=swap');
+    body, table, td, a { font-family: 'Fustat', 'Segoe UI', Arial, sans-serif !important; }
+    img { border: 0; display: block; outline: none; text-decoration: none; }
+    table { border-collapse: collapse; }
+    @media only screen and (max-width: 620px) {
+      .email-shell { width: 100% !important; border-radius: 0 !important; }
+      .content-pad { padding: 26px 20px !important; }
+      .mobile-stack, .mobile-stack tbody, .mobile-stack tr, .mobile-stack td { display: block !important; width: 100% !important; }
+      .mobile-center { text-align: center !important; }
+      .mascot-image { width: 210px !important; margin: 0 auto !important; }
+      .hero-copy { padding: 8px 24px 30px !important; }
+      .detail-label { width: 38% !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f4f7f4;color:#4c5267;-webkit-text-size-adjust:100%;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">{{PreviewText}}</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#f4f7f4;">
+    <tr><td align="center" style="padding:32px 14px;">
+      <table role="presentation" class="email-shell" width="620" cellspacing="0" cellpadding="0" style="width:620px;max-width:620px;overflow:hidden;border:1px solid #dfe6e3;border-radius:22px;background:#ffffff;box-shadow:0 18px 55px rgba(32,71,73,.12);">
+        <tr><td style="padding:20px 28px;background:#204749;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
+            <td width="54" style="width:54px;vertical-align:middle;"><img src="{{BrandIconUrl}}" width="48" height="48" alt="" style="width:48px;height:48px;object-fit:contain;"></td>
+            <td style="vertical-align:middle;color:#ffffff;font-size:25px;font-weight:800;letter-spacing:-1.2px;">bubu</td>
+            <td align="right" style="vertical-align:middle;color:#c8d9d5;font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;">Seu dia, mais leve</td>
+          </tr></table>
+        </td></tr>
+        <tr><td>{{Content}}</td></tr>
+        <tr><td class="content-pad" style="padding:25px 34px;background:#f8faf8;border-top:1px solid #e7ece9;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
+            <td style="color:#7c7c8a;font-size:12px;line-height:19px;">Este é um aviso automático da sua conta Bubu.<br>Nunca compartilhe sua senha ou códigos de acesso.</td>
+            <td align="right" style="color:#204749;font-size:12px;font-weight:700;vertical-align:bottom;">© {{CurrentYear}} bubu</td>
+          </tr></table>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

@@ -1,7 +1,8 @@
 @import '@fontsource-variable/fustat';
 
 :root {
-  font-family: 'Fustat Variable', 'Segoe UI', sans-serif;
+  --font-app: 'Fustat Variable', 'Fustat', 'Segoe UI', sans-serif;
+  font-family: var(--font-app);
   color: #4c5267;
   background: #ffffff;
   color-scheme: light;
@@ -23,6 +24,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  font-family: var(--font-app);
 }
 
 #root {
@@ -34,6 +36,9 @@ a {
 }
 
 button,
+input,
+select,
+textarea,
 a {
   font: inherit;
 }

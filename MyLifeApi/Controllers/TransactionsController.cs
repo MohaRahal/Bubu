@@ -4,12 +4,15 @@ using MyLifeApi.Data;
 using MyLifeApi.DTOs;
 using MyLifeApi.DTOs.Transactions;
 using MyLifeApi.Models;
+using MyLifeApi.Services.Email;
 
 namespace MyLifeApi.Controllers;
 
 [ApiController]
 [Route("api/transactions")]
-public class TransactionsController(MyLifeDbContext db) : ControllerBase
+public class TransactionsController(
+    MyLifeDbContext db,
+    FinancialMovementEmailDispatcher emailDispatcher) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<TransactionResponse>>> GetAll(
@@ -74,6 +77,7 @@ public class TransactionsController(MyLifeDbContext db) : ControllerBase
 
         db.Transactions.Add(transaction);
         await db.SaveChangesAsync(cancellationToken);
+        await emailDispatcher.NotifyAsync(transaction, cancellationToken);
 
         return CreatedAtAction(
             nameof(GetById),

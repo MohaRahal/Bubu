@@ -10,13 +10,14 @@ import {
   ChevronDown,
   CircleDollarSign,
   CreditCard,
+  FileText,
   Landmark,
   LoaderCircle,
   Pause,
   Pencil,
+  PiggyBank,
   Play,
   Plus,
-  RefreshCw,
   Repeat2,
   Trash2,
   TrendingDown,
@@ -35,6 +36,9 @@ import {
   YAxis,
 } from 'recharts'
 import { AuthMascot } from '../../components/auth/AuthMascot'
+import { FinanceReportModal } from '../../components/finance/FinanceReportModal'
+import { BubuPageHero } from '../../components/layout/BubuPageHero'
+import { BubuChartLoading, CardSkeletonGrid, DataPageSkeleton, ErrorNotice } from '../../components/layout/DataStates'
 import bubuSavingMoney from '../../assets/bubu-guardando-dinheiro.png'
 import bubuSpendingMoney from '../../assets/bubu-tirando-dinheiro.png'
 import {
@@ -130,6 +134,7 @@ export function FinancePage() {
   const [accountToDelete, setAccountToDelete] = useState(null)
   const [movementView, setMovementView] = useState('movements')
   const [recurringAction, setRecurringAction] = useState(null)
+  const [isReportOpen, setIsReportOpen] = useState(false)
 
   const range = useMemo(() => ranges[selectedRange].getValue(), [selectedRange])
 
@@ -170,10 +175,31 @@ export function FinancePage() {
   function handleCreated() {
     setModalType(null)
     setAccountToEdit(null)
+    setIsLoading(true)
+    setErrorMessage('')
+    setReloadKey((current) => current + 1)
+  }
+
+  function retryDashboard() {
+    setIsLoading(true)
+    setErrorMessage('')
     setReloadKey((current) => current + 1)
   }
 
   if (isLoading && !dashboard) return <FinanceSkeleton />
+
+  if (!dashboard) {
+    return (
+      <div className={styles.page}>
+        <FinanceHero />
+        <ErrorNotice
+          message={errorMessage || 'Não recebemos os dados financeiros.'}
+          title="Não conseguimos abrir suas finanças."
+          onRetry={retryDashboard}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className={styles.page}>
@@ -202,7 +228,7 @@ export function FinancePage() {
             onDeleted={() => {
               if (selectedAccountId === accountToDelete.id.toString()) setSelectedAccountId('')
               setAccountToDelete(null)
-              setReloadKey((current) => current + 1)
+              retryDashboard()
             }}
           />,
           document.body,
@@ -216,45 +242,32 @@ export function FinancePage() {
             onClose={() => setRecurringAction(null)}
             onConfirmed={() => {
               setRecurringAction(null)
-              setReloadKey((current) => current + 1)
+              retryDashboard()
             }}
           />,
           document.body,
         )}
 
-      <section className={styles.heading}>
-        <div>
-          <span className={styles.eyebrow}>SEU DINHEIRO, SEM COMPLICAÇÃO</span>
-          <h1>Finanças</h1>
-          <p>Acompanhe suas contas juntas ou entenda cada uma separadamente.</p>
-        </div>
-        <div className={styles.headingActions}>
-          <button
-            className={styles.secondaryButton}
-            type="button"
-            onClick={() => setModalType('transfer')}
-            disabled={(dashboard?.accounts.length ?? 0) < 2}
-          >
-            <ArrowRightLeft size={17} /> Transferir
-          </button>
-          <button
-            className={styles.primaryButton}
-            type="button"
-            onClick={() => setModalType('income')}
-          >
-            <Plus size={17} /> Nova movimentação
-          </button>
-        </div>
-      </section>
+      {isReportOpen &&
+        createPortal(
+          <FinanceReportModal
+            accountId={selectedAccountId}
+            accountName={selectedAccount?.name}
+            from={range.from}
+            to={range.to}
+            onClose={() => setIsReportOpen(false)}
+          />,
+          document.body,
+        )}
+
+      <FinanceHero>
+        <button type="button" onClick={() => setIsReportOpen(true)} disabled={!dashboard}><FileText size={17} /> Exportar relatório</button>
+        <button type="button" onClick={() => setModalType('transfer')} disabled={(dashboard?.accounts.length ?? 0) < 2}><ArrowRightLeft size={17} /> Transferir</button>
+        <button type="button" onClick={() => setModalType('income')}><Plus size={17} /> Nova movimentação</button>
+      </FinanceHero>
 
       {errorMessage && (
-        <div className={styles.errorState} role="alert">
-          <RefreshCw size={19} />
-          <span>{errorMessage}</span>
-          <button type="button" onClick={() => setReloadKey((current) => current + 1)}>
-            Tentar novamente
-          </button>
-        </div>
+        <ErrorNotice message={errorMessage} onRetry={retryDashboard} />
       )}
 
       <section className={styles.controlBar}>
@@ -263,6 +276,7 @@ export function FinancePage() {
           <select
             value={selectedAccountId}
             onChange={(event) => {
+              setIsLoading(true)
               setSelectedAccountId(event.target.value)
               setErrorMessage('')
             }}
@@ -282,6 +296,7 @@ export function FinancePage() {
               className={selectedRange === key ? styles.activeRange : undefined}
               type="button"
               onClick={() => {
+                setIsLoading(true)
                 setSelectedRange(key)
                 setErrorMessage('')
               }}
@@ -296,7 +311,7 @@ export function FinancePage() {
         </span>
       </section>
 
-      <section className={styles.summaryGrid}>
+      {isLoading ? <CardSkeletonGrid count={4} /> : <section className={styles.summaryGrid}>
         <SummaryCard
           icon={CircleDollarSign}
           label={selectedAccount ? `Saldo em ${selectedAccount.name}` : 'Patrimônio disponível'}
@@ -333,7 +348,7 @@ export function FinancePage() {
           }
           tone={dashboard?.summary.periodResult >= 0 ? 'lime' : 'red'}
         />
-      </section>
+      </section>}
 
       <section className={styles.mainGrid}>
         <article className={styles.chartCard}>
@@ -355,6 +370,7 @@ export function FinancePage() {
             </div>
           </header>
           <div className={styles.chartArea}>
+            {isLoading ? <BubuChartLoading title="Atualizando suas finanças..." message="O Bubu está recalculando entradas, saídas e saldo." /> : (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData} margin={{ top: 18, right: 14, left: 0, bottom: 0 }}>
                 <defs>
@@ -406,6 +422,7 @@ export function FinancePage() {
                 />
               </ComposedChart>
             </ResponsiveContainer>
+            )}
           </div>
           {selectedAccount &&
             (dashboard.summary.incomingTransfers > 0 ||
@@ -679,18 +696,23 @@ function AccountCard({ account, index, selected, onSelect, onEdit, onDelete }) {
 
 function MovementRow({ movement, selectedAccountId }) {
   const isTransfer = movement.kind === 'transfer'
+  const isGoalDeposit = movement.kind === 'goal_deposit'
+  const isGoalWithdrawal = movement.kind === 'goal_withdrawal'
+  const isGoalTransfer = isGoalDeposit || isGoalWithdrawal
   const isOpeningBalance = movement.kind === 'opening_balance'
   const isIncome = movement.kind === 'income'
   const isOutgoingTransfer =
     isTransfer && selectedAccountId && movement.accountId.toString() === selectedAccountId
   const prefix =
-    isOpeningBalance || isIncome || (isTransfer && selectedAccountId && !isOutgoingTransfer)
+    isOpeningBalance || isIncome || isGoalWithdrawal || (isTransfer && selectedAccountId && !isOutgoingTransfer)
       ? '+'
       : isTransfer && !selectedAccountId
         ? ''
         : '−'
   const Icon = isOpeningBalance
     ? Landmark
+    : isGoalTransfer
+      ? PiggyBank
     : isTransfer
       ? ArrowRightLeft
       : isIncome
@@ -698,6 +720,8 @@ function MovementRow({ movement, selectedAccountId }) {
         : ArrowUpRight
   const iconClass = isOpeningBalance
     ? styles.openingIcon
+    : isGoalTransfer
+      ? styles.goalTransferIcon
     : isTransfer
       ? styles.transferIcon
       : isIncome
@@ -705,6 +729,8 @@ function MovementRow({ movement, selectedAccountId }) {
         : styles.expenseIcon
   const valueClass = isOpeningBalance
     ? styles.openingValue
+    : isGoalTransfer
+      ? styles.goalTransferValue
     : isTransfer
       ? styles.transferValue
       : isIncome
@@ -712,10 +738,16 @@ function MovementRow({ movement, selectedAccountId }) {
         : styles.expenseValue
   const detail = isOpeningBalance
     ? 'Ponto de partida da conta'
+    : isGoalTransfer
+      ? isGoalDeposit ? 'Transferência para objetivo' : 'Devolução do objetivo'
     : isTransfer
       ? 'Transferência entre contas'
       : (movement.categoryName ?? (isIncome ? 'Entrada' : 'Saída'))
-  const accountLabel = isTransfer
+  const accountLabel = isGoalTransfer
+    ? isGoalDeposit
+      ? `${movement.accountName} → ${movement.destinationAccountName}`
+      : `${movement.destinationAccountName} → ${movement.accountName}`
+    : isTransfer
     ? `${movement.accountName} → ${movement.destinationAccountName}`
     : movement.accountName
 
@@ -2099,19 +2131,26 @@ function DeleteAccountModal({ account, onClose, onDeleted }) {
   )
 }
 
+function FinanceHero({ children }) {
+  return (
+    <BubuPageHero
+      eyebrow="SEU DINHEIRO, SEM COMPLICAÇÃO"
+      title="Finanças mais claras,"
+      highlight="decisões mais leves."
+      description="O Bubu organiza suas contas, entradas e saídas para você entender seu dinheiro sem transformar tudo em uma planilha complicada."
+      image={bubuSpendingMoney}
+      badge={<><CircleDollarSign size={17} /> Seu dinheiro no lugar certo</>}
+    >
+      {children}
+    </BubuPageHero>
+  )
+}
+
 function FinanceSkeleton() {
   return (
-    <div className={styles.skeleton}>
-      <i />
-      <div>
-        {[1, 2, 3, 4].map((item) => (
-          <i key={item} />
-        ))}
-      </div>
-      <section>
-        <i />
-        <i />
-      </section>
+    <div className={styles.page}>
+      <FinanceHero />
+      <DataPageSkeleton cards={4} panels={2} showChart />
     </div>
   )
 }

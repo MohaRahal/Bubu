@@ -162,7 +162,7 @@
 .welcome h1 em {
   display: block;
   color: var(--lime);
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-weight: 400;
 }
 
@@ -363,12 +363,6 @@
   font-size: 0.78rem;
   font-weight: 720;
   text-decoration: none;
-}
-
-.comingSoon {
-  color: #969c98;
-  font-size: 0.72rem;
-  font-weight: 650;
 }
 
 .inputWrapper {
@@ -626,7 +620,7 @@
   border-radius: 50%;
   color: #fff;
   background: #4285f4;
-  font-family: Arial, sans-serif;
+  font-family: inherit;
   font-size: 0.78rem;
   font-weight: 800;
 }

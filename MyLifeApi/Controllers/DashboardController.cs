@@ -5,13 +5,16 @@ using Microsoft.EntityFrameworkCore;
 using MyLifeApi.Data;
 using MyLifeApi.DTOs.Dashboard;
 using MyLifeApi.Models.Enums;
+using MyLifeApi.Services;
 
 namespace MyLifeApi.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/dashboard")]
-public sealed class DashboardController(MyLifeDbContext db) : ControllerBase
+public sealed class DashboardController(
+    MyLifeDbContext db,
+    AccountBalanceService accountBalanceService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<DashboardResponse>> Get(CancellationToken cancellationToken)
@@ -55,22 +58,13 @@ public sealed class DashboardController(MyLifeDbContext db) : ControllerBase
             })
             .ToListAsync(cancellationToken);
 
-        var initialBalance = await db.Accounts
+        var activeAccountIds = await db.Accounts
             .AsNoTracking()
             .Where(account => account.UserId == userId && account.IsActive)
-            .SumAsync(account => (decimal?)account.InitialBalance, cancellationToken) ?? 0;
-
-        var transactionBalance = await db.Transactions
-            .AsNoTracking()
-            .Where(transaction =>
-                transaction.UserId == userId &&
-                transaction.Account.IsActive &&
-                transaction.Status == TransactionStatus.Completed)
-            .SumAsync(
-                transaction => (decimal?)(transaction.TransactionType == TransactionType.Income
-                    ? transaction.Amount
-                    : -transaction.Amount),
-                cancellationToken) ?? 0;
+            .Select(account => account.Id)
+            .ToListAsync(cancellationToken);
+        var accountBalances = await accountBalanceService.CalculateAsync(userId, cancellationToken);
+        var totalBalance = activeAccountIds.Sum(accountId => accountBalances.GetValueOrDefault(accountId));
 
         var upcomingActivities = await db.Activities
             .AsNoTracking()
@@ -104,6 +98,11 @@ public sealed class DashboardController(MyLifeDbContext db) : ControllerBase
                 goal.TargetDate,
                 goal.TargetValue,
                 goal.Unit,
+                goal.GoalType,
+                CurrentValue = goal.Contributions.Sum(contribution =>
+                    contribution.ContributionType == GoalContributionType.Deposit
+                        ? contribution.Amount
+                        : -contribution.Amount),
                 TotalActivities = goal.ActivityGoals.Count,
                 CompletedActivities = goal.ActivityGoals.Count(link =>
                     link.Activity.Status == ActivityStatus.Completed)
@@ -117,13 +116,17 @@ public sealed class DashboardController(MyLifeDbContext db) : ControllerBase
                 goal.TargetDate,
                 goal.TargetValue,
                 goal.Unit,
+                goal.GoalType,
+                goal.CurrentValue,
                 goal.CompletedActivities,
                 goal.TotalActivities,
-                goal.TotalActivities == 0
-                    ? 0
-                    : decimal.Round(
-                        goal.CompletedActivities * 100m / goal.TotalActivities,
-                        1)))
+                goal.GoalType == GoalType.Money && goal.TargetValue > 0
+                    ? Math.Min(100, decimal.Round(goal.CurrentValue * 100m / goal.TargetValue.Value, 1))
+                    : goal.TotalActivities == 0
+                        ? 0
+                        : decimal.Round(
+                            goal.CompletedActivities * 100m / goal.TotalActivities,
+                            1)))
             .ToList();
 
         var recentTransactions = await db.Transactions
@@ -185,7 +188,7 @@ public sealed class DashboardController(MyLifeDbContext db) : ControllerBase
             todayActivities.Count,
             focusSecondsToday,
             goalData.Count,
-            initialBalance + transactionBalance,
+            totalBalance,
             monthIncome,
             monthExpense);
 

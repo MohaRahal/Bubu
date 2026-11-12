@@ -49,6 +49,49 @@ export async function logout() {
   }
 }
 
+export async function requestPasswordReset(email, signal) {
+  const response = await fetch(`${apiBaseUrl}/api/auth/password-reset/request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error(await readProblem(response, 'Não foi possível solicitar a recuperação.'))
+  }
+
+  return response.json()
+}
+
+export async function validatePasswordResetCode(payload, signal) {
+  const response = await fetch(`${apiBaseUrl}/api/auth/password-reset/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error(await readProblem(response, 'Não foi possível validar o código.'))
+  }
+
+  return response.json()
+}
+
+export async function completePasswordReset(payload, signal) {
+  const response = await fetch(`${apiBaseUrl}/api/auth/password-reset/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error(await readProblem(response, 'Não foi possível redefinir sua senha.'))
+  }
+}
+
 export async function getDashboard(signal) {
   const response = await fetch(`${apiBaseUrl}/api/dashboard`, {
     credentials: 'include',

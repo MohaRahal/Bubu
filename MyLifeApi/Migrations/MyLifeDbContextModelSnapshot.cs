@@ -414,6 +414,148 @@ namespace MyLifeApi.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MyLifeApi.Models.GoalContribution", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint unsigned")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+
+                    b.Property<ulong?>("AccountId")
+                        .HasColumnType("bigint unsigned")
+                        .HasColumnName("account_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("ContributionType")
+                        .IsRequired()
+                        .HasColumnType("enum('deposit','withdrawal')")
+                        .HasColumnName("contribution_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<ulong>("GoalId")
+                        .HasColumnType("bigint unsigned")
+                        .HasColumnName("goal_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)")
+                        .HasColumnName("note");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "CreatedAt")
+                        .HasDatabaseName("idx_goal_contributions_account_created");
+
+                    b.HasIndex("GoalId", "CreatedAt")
+                        .HasDatabaseName("idx_goal_contributions_goal_created");
+
+                    b.ToTable("goal_contributions", null, t =>
+                        {
+                            t.HasCheckConstraint("chk_goal_contribution_amount", "amount > 0");
+                        });
+                });
+
+            modelBuilder.Entity("MyLifeApi.Models.PasswordResetRequest", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint unsigned")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("char(64)")
+                        .HasColumnName("code_hash")
+                        .IsFixedLength();
+
+                    b.Property<string>("CodeSalt")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("varchar(24)")
+                        .HasColumnName("code_salt");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("expires_at");
+
+                    b.Property<uint>("FailedAttempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("failed_attempts");
+
+                    b.Property<string>("RequestedEmail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("requested_email");
+
+                    b.Property<string>("RequestedIp")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)")
+                        .HasColumnName("requested_ip");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("used_at");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)")
+                        .HasColumnName("user_agent");
+
+                    b.Property<ulong?>("UserId")
+                        .HasColumnType("bigint unsigned")
+                        .HasColumnName("user_id");
+
+                    b.Property<DateTime?>("ValidatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("validated_at");
+
+                    b.Property<string>("ValidationTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("char(64)")
+                        .HasColumnName("validation_token_hash")
+                        .IsFixedLength();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("idx_password_reset_requests_expires_at");
+
+                    b.HasIndex("RequestedEmail", "CreatedAt")
+                        .HasDatabaseName("idx_password_reset_requests_email_created");
+
+                    b.HasIndex("UserId", "CreatedAt")
+                        .HasDatabaseName("idx_password_reset_requests_user_created");
+
+                    b.ToTable("password_reset_requests", (string)null);
+                });
+
             modelBuilder.Entity("MyLifeApi.Models.RecurringTransaction", b =>
                 {
                     b.Property<ulong>("Id")
@@ -836,6 +978,37 @@ namespace MyLifeApi.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MyLifeApi.Models.GoalContribution", b =>
+                {
+                    b.HasOne("MyLifeApi.Models.Account", "Account")
+                        .WithMany("GoalContributions")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_goal_contributions_account");
+
+                    b.HasOne("MyLifeApi.Models.Goal", "Goal")
+                        .WithMany("Contributions")
+                        .HasForeignKey("GoalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_goal_contributions_goal");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Goal");
+                });
+
+            modelBuilder.Entity("MyLifeApi.Models.PasswordResetRequest", b =>
+                {
+                    b.HasOne("MyLifeApi.Models.User", "User")
+                        .WithMany("PasswordResetRequests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_password_reset_requests_user");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MyLifeApi.Models.RecurringTransaction", b =>
                 {
                     b.HasOne("MyLifeApi.Models.Account", "Account")
@@ -934,6 +1107,8 @@ namespace MyLifeApi.Migrations
 
             modelBuilder.Entity("MyLifeApi.Models.Account", b =>
                 {
+                    b.Navigation("GoalContributions");
+
                     b.Navigation("IncomingTransfers");
 
                     b.Navigation("OutgoingTransfers");
@@ -963,6 +1138,8 @@ namespace MyLifeApi.Migrations
             modelBuilder.Entity("MyLifeApi.Models.Goal", b =>
                 {
                     b.Navigation("ActivityGoals");
+
+                    b.Navigation("Contributions");
                 });
 
             modelBuilder.Entity("MyLifeApi.Models.RecurringTransaction", b =>
@@ -981,6 +1158,8 @@ namespace MyLifeApi.Migrations
                     b.Navigation("FinancialCategories");
 
                     b.Navigation("Goals");
+
+                    b.Navigation("PasswordResetRequests");
 
                     b.Navigation("RecurringTransactions");
 

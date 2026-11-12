@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react'
 import { AuthMascot } from '../../components/auth/AuthMascot'
+import { DataPageSkeleton, ErrorNotice } from '../../components/layout/DataStates'
 import {
   completeActivity,
   createMyDayActivity,
@@ -33,7 +34,6 @@ function toLocalDateInput(date = new Date()) {
   const offset = date.getTimezoneOffset() * 60_000
   return new Date(date.getTime() - offset).toISOString().slice(0, 10)
 }
-
 function moveDate(date, amount) {
   const value = new Date(`${date}T12:00:00`)
   value.setDate(value.getDate() + amount)
@@ -181,16 +181,11 @@ export function MyDayPage() {
       </header>
 
       {errorMessage && (
-        <div className={styles.errorBanner} role="alert">
-          {errorMessage}
-          <button type="button" onClick={retryLoading}>
-            Tentar novamente
-          </button>
-        </div>
+        <ErrorNotice message={errorMessage} onRetry={retryLoading} title="Não conseguimos carregar seu dia." />
       )}
 
       {isLoading && !day ? (
-        <MyDaySkeleton />
+        <DataPageSkeleton cards={3} panels={2} showChart={false} />
       ) : (
         day && (
           <>
@@ -666,22 +661,5 @@ function SummaryCard({ icon: Icon, label, value, note, tone = '' }) {
       <strong>{value}</strong>
       <p>{note}</p>
     </article>
-  )
-}
-
-function MyDaySkeleton() {
-  return (
-    <div className={styles.skeleton}>
-      <div>
-        <i />
-        <i />
-        <i />
-      </div>
-      <span />
-      <section>
-        <i />
-        <i />
-      </section>
-    </div>
   )
 }

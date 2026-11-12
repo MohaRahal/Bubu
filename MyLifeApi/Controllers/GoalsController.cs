@@ -1,127 +1,248 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyLifeApi.Data;
-using MyLifeApi.DTOs;
 using MyLifeApi.DTOs.Goals;
 using MyLifeApi.Models;
+using MyLifeApi.Models.Enums;
+using MyLifeApi.Services;
 
 namespace MyLifeApi.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/goals")]
-public class GoalsController(MyLifeDbContext db) : ControllerBase
+public sealed class GoalsController(
+    MyLifeDbContext db,
+    AccountBalanceService accountBalanceService) : ControllerBase
 {
+    [HttpGet("account-options")]
+    public async Task<ActionResult<IReadOnlyList<GoalAccountOptionResponse>>> GetAccountOptions(
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+        var balances = await accountBalanceService.CalculateAsync(userId, cancellationToken);
+        var accounts = await db.Accounts
+            .AsNoTracking()
+            .Where(account => account.UserId == userId && account.IsActive)
+            .OrderBy(account => account.Name)
+            .ToListAsync(cancellationToken);
+
+        return Ok(accounts.Select(account => new GoalAccountOptionResponse(
+            account.Id,
+            account.Name,
+            balances.GetValueOrDefault(account.Id))).ToList());
+    }
+
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<GoalResponse>>> GetAll([FromQuery] ulong? userId, CancellationToken ct)
+    public async Task<ActionResult<IReadOnlyList<GoalVaultResponse>>> GetAll(
+        CancellationToken cancellationToken)
     {
-        var query = db.Goals.AsNoTracking();
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
-        if (userId.HasValue)
-        {
-            query = query.Where(goal => goal.UserId == userId);
-        }
+        var goals = await db.Goals
+            .AsNoTracking()
+            .Include(goal => goal.Contributions)
+                .ThenInclude(contribution => contribution.Account)
+            .Where(goal => goal.UserId == userId && goal.Status != GoalStatus.Cancelled)
+            .OrderBy(goal => goal.Status == GoalStatus.Completed)
+            .ThenBy(goal => goal.TargetDate)
+            .ThenByDescending(goal => goal.CreatedAt)
+            .ToListAsync(cancellationToken);
 
-        var goals = await query
-            .OrderBy(goal => goal.TargetDate)
-            .Select(DtoProjections.Goal)
-            .ToListAsync(ct);
-
-        return Ok(goals);
+        return Ok(goals.Select(ToVaultResponse).ToList());
     }
+
     [HttpGet("{id:long}")]
-    public async Task<ActionResult<GoalResponse>> GetById(ulong id, CancellationToken ct)
+    public async Task<ActionResult<GoalVaultResponse>> GetById(
+        ulong id,
+        CancellationToken cancellationToken)
     {
-        var item = await db.Goals.AsNoTracking()
-            .Where(goal => goal.Id == id)
-            .Select(DtoProjections.Goal)
-            .FirstOrDefaultAsync(ct);
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
-        return item is null ? NotFound() : Ok(item);
+        var goal = await db.Goals
+            .AsNoTracking()
+            .Include(item => item.Contributions)
+                .ThenInclude(contribution => contribution.Account)
+            .SingleOrDefaultAsync(
+                item => item.Id == id && item.UserId == userId,
+                cancellationToken);
+
+        return goal is null ? NotFound() : Ok(ToVaultResponse(goal));
     }
+
     [HttpPost]
-    public async Task<ActionResult<GoalResponse>> Create(GoalRequest request, CancellationToken ct)
+    public async Task<ActionResult<GoalVaultResponse>> Create(
+        GoalVaultRequest request,
+        CancellationToken cancellationToken)
     {
-        var error = await Validate(request, ct);
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        if (error is not null)
+        if (request.TargetDate.HasValue && request.TargetDate < today)
+            return BadRequest(new ProblemDetails { Title = "A data da meta não pode estar no passado." });
+
+        var goal = new Goal
         {
-            return BadRequest(new ProblemDetails { Title = error });
-        }
+            UserId = userId,
+            Title = request.Title.Trim(),
+            Description = string.IsNullOrWhiteSpace(request.Description)
+                ? null
+                : request.Description.Trim(),
+            GoalType = GoalType.Money,
+            TargetValue = request.TargetValue,
+            Unit = "R$",
+            StartDate = today,
+            TargetDate = request.TargetDate,
+            Status = GoalStatus.Active
+        };
 
-        var item = new Goal();
-        Apply(item, request);
-
-        db.Goals.Add(item);
-        await db.SaveChangesAsync(ct);
-
-        return CreatedAtAction(nameof(GetById), new { id = item.Id }, ToResponse(item));
+        db.Goals.Add(goal);
+        await db.SaveChangesAsync(cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = goal.Id }, ToVaultResponse(goal));
     }
-    [HttpPut("{id:long}")]
-    public async Task<ActionResult<GoalResponse>> Update(ulong id, GoalRequest request, CancellationToken ct)
+
+    [HttpPost("{id:long}/contributions")]
+    public async Task<ActionResult<GoalVaultResponse>> AddContribution(
+        ulong id,
+        GoalContributionRequest request,
+        CancellationToken cancellationToken)
     {
-        var item = await db.Goals.FindAsync([id], ct);
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
-        if (item is null)
+        await using var databaseTransaction = await db.Database.BeginTransactionAsync(
+            IsolationLevel.Serializable,
+            cancellationToken);
+
+        var goal = await db.Goals
+            .Include(item => item.Contributions)
+                .ThenInclude(contribution => contribution.Account)
+            .SingleOrDefaultAsync(
+                item => item.Id == id && item.UserId == userId,
+                cancellationToken);
+
+        if (goal is null) return NotFound();
+        if (goal.Status == GoalStatus.Cancelled)
+            return BadRequest(new ProblemDetails { Title = "Esse objetivo foi cancelado." });
+
+        Account? account = null;
+        if (request.AccountId.HasValue)
         {
-            return NotFound();
+            account = await db.Accounts.SingleOrDefaultAsync(
+                item => item.Id == request.AccountId.Value &&
+                        item.UserId == userId &&
+                        item.IsActive,
+                cancellationToken);
+            if (account is null)
+                return BadRequest(new ProblemDetails { Title = "Selecione uma conta válida." });
         }
 
-        var error = await Validate(request, ct);
+        var currentValue = CalculateCurrentValue(goal.Contributions);
+        if (request.ContributionType == GoalContributionType.Withdrawal && request.Amount > currentValue)
+            return BadRequest(new ProblemDetails
+            {
+                Title = "O valor retirado não pode ser maior que o saldo do cofre."
+            });
 
-        if (error is not null)
+        if (account is not null && request.ContributionType == GoalContributionType.Deposit)
         {
-            return BadRequest(new ProblemDetails { Title = error });
+            var balances = await accountBalanceService.CalculateAsync(userId, cancellationToken);
+            if (request.Amount > balances.GetValueOrDefault(account.Id))
+                return BadRequest(new ProblemDetails
+                {
+                    Title = "Saldo insuficiente na conta selecionada."
+                });
         }
 
-        Apply(item, request);
-        await db.SaveChangesAsync(ct);
+        goal.Contributions.Add(new GoalContribution
+        {
+            AccountId = account?.Id,
+            Account = account,
+            ContributionType = request.ContributionType,
+            Amount = request.Amount,
+            Note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim()
+        });
 
-        return Ok(ToResponse(item));
+        var updatedValue = request.ContributionType == GoalContributionType.Deposit
+            ? currentValue + request.Amount
+            : currentValue - request.Amount;
+
+        if (goal.TargetValue.HasValue)
+        {
+            if (updatedValue >= goal.TargetValue.Value)
+                goal.Status = GoalStatus.Completed;
+            else if (goal.Status == GoalStatus.Completed)
+                goal.Status = GoalStatus.Active;
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+        await databaseTransaction.CommitAsync(cancellationToken);
+        return Ok(ToVaultResponse(goal));
     }
+
     [HttpDelete("{id:long}")]
-    public async Task<IActionResult> Delete(ulong id, CancellationToken ct)
+    public async Task<IActionResult> Delete(ulong id, CancellationToken cancellationToken)
     {
-        var item = await db.Goals.FindAsync([id], ct);
+        if (!TryGetUserId(out var userId)) return Unauthorized();
 
-        if (item is null)
-        {
-            return NotFound();
-        }
+        var goal = await db.Goals.SingleOrDefaultAsync(
+            item => item.Id == id && item.UserId == userId,
+            cancellationToken);
 
-        db.Goals.Remove(item);
-        await db.SaveChangesAsync(ct);
+        if (goal is null) return NotFound();
 
+        db.Goals.Remove(goal);
+        await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
 
-    private async Task<string?> Validate(GoalRequest r, CancellationToken ct)
+    private bool TryGetUserId(out ulong userId)
     {
-        if (r.TargetDate < r.StartDate)
-        {
-            return "A data-alvo não pode ser anterior à data inicial.";
-        }
-
-        return await db.Users.AnyAsync(user => user.Id == r.UserId, ct)
-            ? null
-            : "Usuário inválido.";
+        var subject = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        return ulong.TryParse(subject, out userId);
     }
 
-    private static void Apply(Goal goal, GoalRequest request)
-    {
-        goal.UserId = request.UserId;
-        goal.Title = request.Title.Trim();
-        goal.Description = request.Description;
-        goal.GoalType = request.GoalType;
-        goal.TargetValue = request.TargetValue;
-        goal.Unit = request.Unit;
-        goal.StartDate = request.StartDate;
-        goal.TargetDate = request.TargetDate;
-        goal.Status = request.Status;
-    }
+    private static decimal CalculateCurrentValue(IEnumerable<GoalContribution> contributions) =>
+        contributions.Sum(contribution =>
+            contribution.ContributionType == GoalContributionType.Deposit
+                ? contribution.Amount
+                : -contribution.Amount);
 
-    private static GoalResponse ToResponse(Goal goal) => new(
-        goal.Id, goal.UserId, goal.Title, goal.Description,
-        goal.GoalType, goal.TargetValue, goal.Unit,
-        goal.StartDate, goal.TargetDate, goal.Status,
-        goal.CreatedAt, goal.UpdatedAt);
+    private static GoalVaultResponse ToVaultResponse(Goal goal)
+    {
+        var currentValue = CalculateCurrentValue(goal.Contributions);
+        var targetValue = goal.TargetValue ?? 0;
+        var progress = targetValue <= 0
+            ? 0
+            : Math.Min(100, Math.Round(currentValue / targetValue * 100, 1));
+        var recentContributions = goal.Contributions
+            .OrderByDescending(contribution => contribution.CreatedAt)
+            .ThenByDescending(contribution => contribution.Id)
+            .Take(5)
+            .Select(contribution => new GoalContributionResponse(
+                contribution.Id,
+                contribution.ContributionType,
+                contribution.AccountId,
+                contribution.Account?.Name,
+                contribution.Amount,
+                contribution.Note,
+                contribution.CreatedAt))
+            .ToList();
+
+        return new GoalVaultResponse(
+            goal.Id,
+            goal.Title,
+            goal.Description,
+            goal.GoalType,
+            goal.Unit,
+            targetValue,
+            currentValue,
+            progress,
+            goal.TargetDate,
+            goal.Status,
+            recentContributions,
+            goal.CreatedAt);
+    }
 }

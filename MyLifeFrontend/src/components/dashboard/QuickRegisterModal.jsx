@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Activity,
   ArrowDownRight,
@@ -147,7 +148,7 @@ export function QuickRegisterModal({ onClose, onRegistered }) {
     }
   }
 
-  return (
+  return createPortal(
     <div className={styles.backdrop} onMouseDown={(event) => event.target === event.currentTarget && !isSaving && onClose()}>
       <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="register-title">
         {isComplete ? (
@@ -204,7 +205,8 @@ export function QuickRegisterModal({ onClose, onRegistered }) {
           </>
         )}
       </section>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

@@ -18,4 +18,5 @@ public class Account
     public ICollection<Transaction> Transactions { get; set; } = [];
     public ICollection<Transfer> OutgoingTransfers { get; set; } = [];
     public ICollection<Transfer> IncomingTransfers { get; set; } = [];
+    public ICollection<GoalContribution> GoalContributions { get; set; } = [];
 }

@@ -6,15 +6,37 @@ async function readError(response, fallbackMessage) {
   return validationMessage ?? problem?.title ?? problem?.detail ?? fallbackMessage
 }
 
-export async function getFinanceDashboard({ accountId, from, to, signal }) {
+export async function getFinanceDashboard({ accountId, from, to, report = false, signal }) {
   const params = new URLSearchParams({ from, to })
   if (accountId) params.set('accountId', accountId)
+  if (report) params.set('report', 'true')
 
   const response = await fetch(`${apiBaseUrl}/api/finance?${params}`, {
     credentials: 'include',
     signal,
   })
   if (!response.ok) throw new Error(await readError(response, 'Não foi possível carregar suas finanças.'))
+  return response.json()
+}
+
+export async function emailFinanceReport({ pdf, accountId, from, to }) {
+  const formData = new FormData()
+  formData.set('report', pdf, `relatorio-bubu-${from}-${to}.pdf`)
+  formData.set('from', from)
+  formData.set('to', to)
+  if (accountId) formData.set('accountId', accountId)
+
+  const response = await fetch(`${apiBaseUrl}/api/finance/report/email`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  })
+  if (!response.ok) {
+    const fallback = response.status === 429
+      ? 'Muitos envios em pouco tempo. Aguarde alguns minutos e tente novamente.'
+      : 'Não foi possível enviar o relatório por e-mail.'
+    throw new Error(await readError(response, fallback))
+  }
   return response.json()
 }
 

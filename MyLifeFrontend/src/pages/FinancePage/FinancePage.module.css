@@ -7,14 +7,6 @@
   gap: 15px;
   color: var(--ink);
 }
-.heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 6px 2px 14px;
-}
-.eyebrow,
 .chartCard header span:first-child,
 .accountsPanel header span,
 .movementsCard header span,
@@ -24,22 +16,6 @@
   font-weight: 900;
   letter-spacing: 0.14em;
 }
-.heading h1 {
-  margin: 5px 0 4px;
-  font-size: clamp(2.3rem, 4vw, 4.2rem);
-  line-height: 0.95;
-  letter-spacing: -0.065em;
-}
-.heading p {
-  margin: 0;
-  color: #8c958e;
-  font-size: 0.72rem;
-}
-.headingActions {
-  display: flex;
-  gap: 8px;
-}
-.headingActions button,
 .movementsCard header button {
   display: inline-flex;
   min-height: 42px;
@@ -51,21 +27,6 @@
   font-size: 0.65rem;
   font-weight: 800;
   cursor: pointer;
-}
-.primaryButton {
-  border: 1px solid var(--lime);
-  color: var(--ink);
-  background: var(--lime);
-  box-shadow: 0 8px 24px rgba(154, 210, 43, 0.18);
-}
-.secondaryButton {
-  border: 1px solid var(--line);
-  color: #647069;
-  background: #fff;
-}
-.headingActions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
 }
 .controlBar {
   display: flex;
@@ -622,6 +583,10 @@
   color: #6574a7;
   background: #eef0fa;
 }
+.goalTransferIcon {
+  color: #7653b6;
+  background: #f2ecfb;
+}
 .openingIcon {
   color: #9a7126;
   background: #fbf1db;
@@ -668,6 +633,9 @@
 }
 .transferValue {
   color: #6975a3;
+}
+.goalTransferValue {
+  color: #7653b6;
 }
 .openingValue {
   color: #9a7126;
@@ -1860,16 +1828,6 @@
   }
 }
 @media (max-width: 760px) {
-  .heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .headingActions {
-    width: 100%;
-  }
-  .headingActions button {
-    flex: 1;
-  }
   .controlBar {
     align-items: stretch;
     flex-direction: column;

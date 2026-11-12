@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import {
-  Activity,
   ArrowDownRight,
   ArrowUpRight,
   CalendarCheck,
@@ -17,7 +16,6 @@ import {
   Menu,
   PanelLeftClose,
   Plus,
-  RefreshCw,
   Settings,
   Target,
   WalletCards,
@@ -38,17 +36,17 @@ import { LogoutModal } from '../../components/dashboard/LogoutModal'
 import { QuickRegisterModal } from '../../components/dashboard/QuickRegisterModal'
 import { useAuth } from '../../hooks/useAuth'
 import { ProfilePage } from '../ProfilePage/ProfilePage'
-import { MyDayPage } from '../MyDayPage/MyDayPage'
 import { FinancePage } from '../FinancePage/FinancePage'
+import { GoalsPage } from '../GoalsPage/GoalsPage'
+import { MyDayPage } from '../MyDayPage/MyDayPage'
 import { getDashboard } from '../../services/authApi'
-import { BubuLoadingScreen } from '../../components/layout/BubuLoadingScreen'
+import { BubuPageHero } from '../../components/layout/BubuPageHero'
+import { BubuChartLoading, CardSkeletonGrid, DataPageSkeleton, ErrorNotice } from '../../components/layout/DataStates'
 import styles from './DashboardPage.module.css'
 
 const menuItems = [
   { label: 'Visão geral', icon: LayoutDashboard, path: '/dashboard' },
-  { label: 'Meu dia', icon: CalendarCheck, path: '/dashboard/meu-dia' },
-  { label: 'Atividades', icon: Activity },
-  { label: 'Objetivos', icon: Target },
+  { label: 'Objetivos', icon: Target, path: '/dashboard/objetivos' },
   { label: 'Finanças', icon: WalletCards, path: '/dashboard/financas' },
 ]
 
@@ -117,14 +115,17 @@ export function DashboardPage() {
   const isProfileView = location.pathname === '/dashboard/perfil'
   const isMyDayView = location.pathname === '/dashboard/meu-dia'
   const isFinanceView = location.pathname === '/dashboard/financas'
-  const isOverviewView = !isProfileView && !isMyDayView && !isFinanceView
+  const isGoalsView = location.pathname === '/dashboard/objetivos'
+  const isOverviewView = !isProfileView && !isMyDayView && !isFinanceView && !isGoalsView
   const activeView = isProfileView
     ? 'profile'
     : isMyDayView
       ? 'my-day'
       : isFinanceView
         ? 'finance'
-        : 'overview'
+        : isGoalsView
+          ? 'goals'
+          : 'overview'
   const [dashboard, setDashboard] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -145,12 +146,14 @@ export function DashboardPage() {
         ? 'Meu dia | Bubu'
         : isFinanceView
           ? 'Finanças | Bubu'
-          : 'Dashboard | Bubu'
+          : isGoalsView
+            ? 'Objetivos | Bubu'
+            : 'Dashboard | Bubu'
 
     return () => {
       document.title = previousTitle
     }
-  }, [isFinanceView, isMyDayView, isProfileView])
+  }, [isFinanceView, isGoalsView, isMyDayView, isProfileView])
 
   useEffect(() => {
     if (!isOverviewView) return undefined
@@ -345,6 +348,8 @@ export function DashboardPage() {
               <CalendarCheck size={17} />
             ) : isFinanceView ? (
               <WalletCards size={17} />
+            ) : isGoalsView ? (
+              <Target size={17} />
             ) : (
               <LayoutDashboard size={17} />
             )}
@@ -355,7 +360,9 @@ export function DashboardPage() {
                   ? 'Meu dia'
                   : isFinanceView
                     ? 'Finanças'
-                    : 'Visão geral'}
+                    : isGoalsView
+                      ? 'Objetivos'
+                      : 'Visão geral'}
             </span>
           </div>
           <button
@@ -405,42 +412,28 @@ export function DashboardPage() {
               {isProfileView && <ProfilePage />}
               {isMyDayView && <MyDayPage key={quickRegisterVersion} />}
               {isFinanceView && <FinancePage key={quickRegisterVersion} />}
+              {isGoalsView && <GoalsPage key={quickRegisterVersion} />}
               {isOverviewView && (
                 <>
-                  <section className={styles.welcome}>
-                    <div>
-                      <span className={styles.eyebrow}>SUA VIDA, EM UM SÓ LUGAR</span>
-                      <h1>Bom dia, {user.name.split(' ')[0]}.</h1>
-                      <p>Acompanhe seu ritmo e escolha o próximo passo com calma.</p>
-                    </div>
-                    <span className={styles.datePill}>
-                      <CalendarCheck size={17} />
-                      {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date())}
-                    </span>
-                  </section>
+                  <BubuPageHero
+                    eyebrow="SUA VIDA, EM UM SÓ LUGAR"
+                    title={`Bom dia, ${user.name.split(' ')[0]}.`}
+                    highlight="Vamos cuidar do que importa?"
+                    description="O Bubu reuniu seu dia, seus objetivos e seu dinheiro para você decidir o próximo passo com mais tranquilidade."
+                    image={bubuIcon}
+                    badge={<><CalendarCheck size={17} /> {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date())}</>}
+                  />
 
-                  {errorMessage && !dashboard && (
-                    <section className={styles.errorState} role="alert">
-                      <RefreshCw size={22} />
-                      <div>
-                        <strong>Não conseguimos carregar seus dados.</strong>
-                        <p>{errorMessage}</p>
-                      </div>
-                      <button type="button" onClick={handleRetry}>
-                        Tentar novamente
-                      </button>
-                    </section>
+                  {errorMessage && (
+                    <ErrorNotice message={errorMessage} onRetry={handleRetry} title="Não conseguimos carregar seus dados." />
                   )}
 
                   {isLoading && !dashboard ? (
-                    <BubuLoadingScreen
-                      title="Quase lá..."
-                      message="O Bubu está buscando suas informações mais recentes..."
-                    />
+                    <DataPageSkeleton cards={4} panels={2} showChart />
                   ) : (
                     dashboard && (
                       <>
-                        <section className={styles.summaryGrid} aria-label="Resumo do dia">
+                        {isLoading ? <CardSkeletonGrid count={4} /> : <section className={styles.summaryGrid} aria-label="Resumo do dia">
                           <SummaryCard
                             icon={CheckCircle2}
                             label="Atividades de hoje"
@@ -467,7 +460,7 @@ export function DashboardPage() {
                             note="contas ativas"
                             tone="dark"
                           />
-                        </section>
+                        </section>}
 
                         <section className={styles.chartCard}>
                           <header>
@@ -507,6 +500,7 @@ export function DashboardPage() {
                           </header>
 
                           <div className={styles.chartArea}>
+                            {isLoading ? <BubuChartLoading title="Atualizando seu ritmo..." message="O Bubu está buscando os dados mais recentes." /> : (
                             <ResponsiveContainer width="100%" height="100%">
                               <AreaChart
                                 data={chartData}
@@ -598,6 +592,7 @@ export function DashboardPage() {
                                 )}
                               </AreaChart>
                             </ResponsiveContainer>
+                            )}
                           </div>
 
                           <footer className={styles.financeStrip}>
@@ -685,7 +680,9 @@ export function DashboardPage() {
                                     <i style={{ width: `${goal.progressPercentage}%` }} />
                                   </div>
                                   <small>
-                                    {goal.totalActivities === 0
+                                    {goal.goalType === 'money'
+                                      ? `${formatCurrency(goal.currentValue)} de ${formatCurrency(goal.targetValue)}`
+                                      : goal.totalActivities === 0
                                       ? 'Ainda sem atividades vinculadas'
                                       : `${goal.completedActivities} de ${goal.totalActivities} atividades concluídas`}
                                   </small>

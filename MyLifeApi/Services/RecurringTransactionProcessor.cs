@@ -2,10 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using MyLifeApi.Data;
 using MyLifeApi.Models;
 using MyLifeApi.Models.Enums;
+using MyLifeApi.Services.Email;
 
 namespace MyLifeApi.Services;
 
-public sealed class RecurringTransactionProcessor(MyLifeDbContext db)
+public sealed class RecurringTransactionProcessor(
+    MyLifeDbContext db,
+    FinancialMovementEmailDispatcher emailDispatcher)
 {
     private static readonly SemaphoreSlim ProcessingGate = new(1, 1);
 
@@ -31,6 +34,7 @@ public sealed class RecurringTransactionProcessor(MyLifeDbContext db)
                 query = query.Where(recurrence => recurrence.UserId == userId.Value);
 
             var recurrences = await query.ToListAsync(cancellationToken);
+            var generatedTransactions = new List<Transaction>();
             foreach (var recurrence in recurrences)
             {
                 var generatedDateList = await db.Transactions
@@ -46,7 +50,7 @@ public sealed class RecurringTransactionProcessor(MyLifeDbContext db)
                     var dueDate = recurrence.NextDueDate;
                     if (!generatedDates.Contains(dueDate))
                     {
-                        db.Transactions.Add(new Transaction
+                        var transaction = new Transaction
                         {
                             UserId = recurrence.UserId,
                             AccountId = recurrence.AccountId,
@@ -58,7 +62,9 @@ public sealed class RecurringTransactionProcessor(MyLifeDbContext db)
                             TransactionDate = dueDate,
                             Status = TransactionStatus.Completed,
                             Notes = "Gerada automaticamente por uma recorrência."
-                        });
+                        };
+                        db.Transactions.Add(transaction);
+                        generatedTransactions.Add(transaction);
                         generatedDates.Add(dueDate);
                     }
 
@@ -70,7 +76,11 @@ public sealed class RecurringTransactionProcessor(MyLifeDbContext db)
             }
 
             if (recurrences.Count > 0)
+            {
                 await db.SaveChangesAsync(cancellationToken);
+                foreach (var transaction in generatedTransactions)
+                    await emailDispatcher.NotifyAsync(transaction, cancellationToken);
+            }
         }
         finally
         {

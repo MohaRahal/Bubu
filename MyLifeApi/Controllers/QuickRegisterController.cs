@@ -6,13 +6,16 @@ using MyLifeApi.Data;
 using MyLifeApi.DTOs.QuickRegister;
 using MyLifeApi.Models;
 using MyLifeApi.Models.Enums;
+using MyLifeApi.Services.Email;
 
 namespace MyLifeApi.Controllers;
 
 [ApiController]
 [Authorize]
 [Route("api/quick-register")]
-public sealed class QuickRegisterController(MyLifeDbContext db) : ControllerBase
+public sealed class QuickRegisterController(
+    MyLifeDbContext db,
+    FinancialMovementEmailDispatcher emailDispatcher) : ControllerBase
 {
     [HttpGet("options")]
     public async Task<ActionResult<QuickRegisterOptionsResponse>> GetOptions(
@@ -129,6 +132,7 @@ public sealed class QuickRegisterController(MyLifeDbContext db) : ControllerBase
 
         db.Transactions.Add(transaction);
         await db.SaveChangesAsync(cancellationToken);
+        await emailDispatcher.NotifyAsync(transaction, cancellationToken);
         return Created($"/api/transactions/{transaction.Id}", new { transaction.Id });
     }
 

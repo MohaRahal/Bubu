@@ -4,6 +4,7 @@ import { Route, Routes, useLocation } from 'react-router'
 import { ProtectedRoute, RouteLoading } from './components/auth/ProtectedRoute'
 import { HomePage } from './pages/HomePage/HomePage'
 import { LoginPage } from './pages/LoginPage/LoginPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage/ForgotPasswordPage'
 import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage'
 import { RegisterPage } from './pages/RegisterPage/RegisterPage'
 
@@ -31,6 +32,7 @@ function App() {
         <Routes location={location}>
           <Route index element={<HomePage />} />
           <Route path="login" element={<LoginPage />} />
+          <Route path="esqueci-minha-senha" element={<ForgotPasswordPage />} />
           <Route path="cadastro" element={<RegisterPage />} />
           <Route
             path="dashboard/*"

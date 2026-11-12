@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MyLifeApi.Data;
@@ -19,6 +20,7 @@ public sealed class AuthController(
     MyLifeDbContext db,
     IPasswordHasher<User> passwordHasher,
     AuthTokenService tokenService,
+    PasswordResetService passwordResetService,
     IOptions<JwtOptions> jwtOptions,
     IHostEnvironment environment) : ControllerBase
 {
@@ -79,6 +81,59 @@ public sealed class AuthController(
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting("password-reset-request")]
+    [HttpPost("password-reset/request")]
+    public async Task<ActionResult<PasswordResetRequestedResponse>> RequestPasswordReset(
+        RequestPasswordResetRequest request,
+        CancellationToken cancellationToken)
+    {
+        await passwordResetService.RequestAsync(
+            request.Email,
+            HttpContext.Connection.RemoteIpAddress?.ToString(),
+            Request.Headers.UserAgent.ToString(),
+            cancellationToken);
+
+        return Accepted(new PasswordResetRequestedResponse(
+            "Se o e-mail estiver cadastrado, enviaremos um código de recuperação.",
+            passwordResetService.CodeLifetimeMinutes));
+    }
+
+    [AllowAnonymous]
+    [EnableRateLimiting("password-reset-confirm")]
+    [HttpPost("password-reset/validate")]
+    public async Task<ActionResult<PasswordResetCodeValidatedResponse>> ValidatePasswordResetCode(
+        ValidatePasswordResetCodeRequest request,
+        CancellationToken cancellationToken)
+    {
+        var resetToken = await passwordResetService.ValidateCodeAsync(
+            request.Email,
+            request.Code,
+            cancellationToken);
+
+        return resetToken is not null
+            ? Ok(new PasswordResetCodeValidatedResponse(resetToken))
+            : BadRequest(CreateInvalidResetProblem());
+    }
+
+    [AllowAnonymous]
+    [EnableRateLimiting("password-reset-confirm")]
+    [HttpPost("password-reset/confirm")]
+    public async Task<IActionResult> ConfirmPasswordReset(
+        CompletePasswordResetRequest request,
+        CancellationToken cancellationToken)
+    {
+        var succeeded = await passwordResetService.CompleteAsync(
+            request.Email,
+            request.ResetToken,
+            request.NewPassword,
+            cancellationToken);
+
+        return succeeded
+            ? NoContent()
+            : BadRequest(CreateInvalidResetProblem());
+    }
+
+    [AllowAnonymous]
     [HttpPost("logout")]
     public IActionResult Logout()
     {
@@ -99,6 +154,12 @@ public sealed class AuthController(
     {
         Status = StatusCodes.Status401Unauthorized,
         Title = "E-mail ou senha inválidos."
+    };
+
+    private static ProblemDetails CreateInvalidResetProblem() => new()
+    {
+        Title = "Código inválido ou expirado.",
+        Detail = "Solicite um novo código e tente novamente."
     };
 
     private static AuthenticatedUserResponse ToResponse(User user) =>

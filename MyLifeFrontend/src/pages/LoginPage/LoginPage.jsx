@@ -140,7 +140,7 @@ export function LoginPage() {
             <div className={styles.field}>
               <div className={styles.labelRow}>
                 <label htmlFor="password">Senha</label>
-                <span className={styles.comingSoon}>Recuperação em breve</span>
+                <Link to="/esqueci-minha-senha">Esqueceu sua senha?</Link>
               </div>
 
               <div className={styles.inputWrapper}>

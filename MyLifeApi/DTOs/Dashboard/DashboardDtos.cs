@@ -41,6 +41,8 @@ public sealed record DashboardGoalResponse(
     DateOnly? TargetDate,
     decimal? TargetValue,
     string? Unit,
+    GoalType GoalType,
+    decimal CurrentValue,
     int CompletedActivities,
     int TotalActivities,
     decimal ProgressPercentage);

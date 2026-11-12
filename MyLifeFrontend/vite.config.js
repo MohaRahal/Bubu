@@ -9,13 +9,16 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] })
   ],
   server: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5261',
+        target: 'http://127.0.0.1:5261',
         changeOrigin: true,
       },
       '/avatars': {
-        target: 'http://localhost:5261',
+        target: 'http://127.0.0.1:5261',
         changeOrigin: true,
       },
     },

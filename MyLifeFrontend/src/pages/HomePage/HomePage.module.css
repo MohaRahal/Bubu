@@ -97,7 +97,7 @@
 .hero h1 em {
   position: relative;
   color: var(--lime);
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-weight: 400;
 }
 .hero h1 em::after {
@@ -354,7 +354,7 @@
 }
 .manifesto h2 em {
   color: #58a91f;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-weight: 400;
 }
 .manifestoGrid > div {

@@ -29,6 +29,33 @@ CREATE TABLE users (
 );
 
 
+CREATE TABLE password_reset_requests (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL,
+    requested_email VARCHAR(255) NOT NULL,
+    code_hash CHAR(64) NOT NULL,
+    code_salt VARCHAR(24) NOT NULL,
+    requested_ip VARCHAR(45) NULL,
+    user_agent VARCHAR(512) NULL,
+    failed_attempts INT UNSIGNED NOT NULL DEFAULT 0,
+    expires_at DATETIME NOT NULL,
+    validation_token_hash CHAR(64) NULL,
+    validated_at DATETIME NULL,
+    used_at DATETIME NULL,
+    revoked_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_password_reset_requests_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL,
+
+    INDEX idx_password_reset_requests_email_created (requested_email, created_at),
+    INDEX idx_password_reset_requests_user_created (user_id, created_at),
+    INDEX idx_password_reset_requests_expires_at (expires_at)
+);
+
+
 CREATE TABLE categories (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
@@ -169,6 +196,31 @@ CREATE TABLE goals (
             target_value IS NULL
             OR target_value >= 0
         )
+);
+
+
+CREATE TABLE goal_contributions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    goal_id BIGINT UNSIGNED NOT NULL,
+    account_id BIGINT UNSIGNED NULL,
+    contribution_type ENUM('deposit', 'withdrawal') NOT NULL,
+    amount DECIMAL(12,2) NOT NULL,
+    note VARCHAR(300) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_goal_contributions_goal
+        FOREIGN KEY (goal_id)
+        REFERENCES goals(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_goal_contributions_account
+        FOREIGN KEY (account_id)
+        REFERENCES accounts(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_goal_contribution_amount CHECK (amount > 0),
+    INDEX idx_goal_contributions_goal_created (goal_id, created_at),
+    INDEX idx_goal_contributions_account_created (account_id, created_at)
 );
 
 

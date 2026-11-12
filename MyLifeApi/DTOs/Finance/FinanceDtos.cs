@@ -147,3 +147,15 @@ public sealed class CreateFinanceTransferRequest
     [StringLength(200)]
     public string? Description { get; set; }
 }
+
+public sealed class EmailFinanceReportRequest
+{
+    [Required]
+    public IFormFile Report { get; set; } = null!;
+
+    public DateOnly From { get; set; }
+
+    public DateOnly To { get; set; }
+
+    public ulong? AccountId { get; set; }
+}

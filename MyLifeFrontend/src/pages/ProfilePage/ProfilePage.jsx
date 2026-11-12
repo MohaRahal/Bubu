@@ -14,6 +14,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import bubuImage from '../../assets/bubu-3d.png'
+import { DataPageSkeleton, ErrorNotice } from '../../components/layout/DataStates'
 import { useAuth } from '../../hooks/useAuth'
 import { changePassword, getAvatars, getProfile, updateProfile } from '../../services/profileApi'
 import styles from './ProfilePage.module.css'
@@ -36,6 +37,7 @@ export function ProfilePage() {
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [profileMessage, setProfileMessage] = useState(null)
   const [passwordMessage, setPasswordMessage] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -57,7 +59,7 @@ export function ProfilePage() {
       .finally(() => setIsLoading(false))
 
     return () => controller.abort()
-  }, [])
+  }, [reloadKey])
 
   function handleFieldChange(event) {
     const { name, value } = event.target
@@ -120,11 +122,21 @@ export function ProfilePage() {
   }
 
   if (isLoading) {
+    return <DataPageSkeleton cards={2} panels={2} showChart={false} />
+  }
+
+  if (!profile) {
     return (
-      <div className={styles.loadingState} aria-label="Carregando perfil">
-        <img src={bubuImage} alt="Bubu" />
-        <LoaderCircle size={22} />
-        <span>Preparando seu espaço...</span>
+      <div className={styles.page}>
+        <ErrorNotice
+          message={profileMessage?.text || 'Não recebemos os dados do seu perfil.'}
+          title="Não conseguimos abrir seu perfil."
+          onRetry={() => {
+            setIsLoading(true)
+            setProfileMessage(null)
+            setReloadKey((current) => current + 1)
+          }}
+        />
       </div>
     )
   }

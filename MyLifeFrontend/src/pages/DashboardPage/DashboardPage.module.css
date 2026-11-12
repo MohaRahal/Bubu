@@ -280,50 +280,11 @@
 .viewTransition {
   width: 100%;
 }
-.welcome {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  margin-bottom: 32px;
-}
-.eyebrow {
-  color: var(--green);
-  font-size: 0.62rem;
-  font-weight: 850;
-  letter-spacing: 0.15em;
-}
-.welcome h1 {
-  margin: 8px 0 7px;
-  color: var(--ink);
-  font-size: clamp(2.25rem, 4vw, 4rem);
-  font-weight: 650;
-  line-height: 1;
-  letter-spacing: -0.055em;
-}
-.welcome p {
-  margin: 0;
-  color: #8a918c;
-  font-size: 0.88rem;
-}
-.datePill {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.65rem 0.9rem;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  color: #717974;
-  background: #fff;
-  font-size: 0.72rem;
-  font-weight: 670;
-  text-transform: capitalize;
-}
 .summaryGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+  margin-top: 18px;
 }
 .summaryCard {
   min-width: 0;
@@ -834,11 +795,6 @@
   .dashboardContent {
     padding: 28px 14px 54px;
   }
-  .welcome {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 18px;
-  }
   .chartCard > header {
     align-items: flex-start;
     flex-direction: column;
@@ -870,9 +826,6 @@
   .summaryCard > strong {
     margin-top: 16px;
   }
-  .datePill {
-    width: 100%;
-  }
   .activityRow,
   .goalRow,
   .transactionRow {
@@ -880,9 +833,6 @@
   }
   .transactionRow b {
     font-size: 0.62rem;
-  }
-  .welcome h1 {
-    font-size: 2.7rem;
   }
   .skeletonCards,
   .skeletonGrid {

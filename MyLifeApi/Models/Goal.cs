@@ -19,4 +19,5 @@ public class Goal
 
     public User User { get; set; } = null!;
     public ICollection<ActivityGoal> ActivityGoals { get; set; } = [];
+    public ICollection<GoalContribution> Contributions { get; set; } = [];
 }

@@ -298,7 +298,7 @@
   gap: 0.35rem;
   margin-top: 6px;
   color: #4f9926;
-  font-family: ui-monospace, monospace;
+  font-family: inherit;
   font-size: 0.65rem;
 }
 .liveTimer i {

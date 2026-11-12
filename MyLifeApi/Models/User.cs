@@ -39,4 +39,6 @@ public class User
     public ICollection<Transaction> Transactions { get; set; } = [];
 
     public ICollection<Transfer> Transfers { get; set; } = [];
+
+    public ICollection<PasswordResetRequest> PasswordResetRequests { get; set; } = [];
 }

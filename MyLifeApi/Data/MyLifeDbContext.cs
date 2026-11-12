@@ -10,12 +10,14 @@ public class MyLifeDbContext(DbContextOptions<MyLifeDbContext> options)
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<Goal> Goals => Set<Goal>();
+    public DbSet<GoalContribution> GoalContributions => Set<GoalContribution>();
     public DbSet<ActivityGoal> ActivityGoals => Set<ActivityGoal>();
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<FinancialCategory> FinancialCategories => Set<FinancialCategory>();
     public DbSet<RecurringTransaction> RecurringTransactions => Set<RecurringTransaction>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Transfer> Transfers => Set<Transfer>();
+    public DbSet<PasswordResetRequest> PasswordResetRequests => Set<PasswordResetRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

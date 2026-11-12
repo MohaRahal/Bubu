@@ -8,6 +8,7 @@ using MyLifeApi.DTOs.Profile;
 using MyLifeApi.Models;
 using MyLifeApi.Models.Enums;
 using MyLifeApi.Services;
+using MyLifeApi.Services.Email;
 
 namespace MyLifeApi.Controllers;
 
@@ -17,7 +18,8 @@ namespace MyLifeApi.Controllers;
 public sealed class ProfileController(
     MyLifeDbContext db,
     IPasswordHasher<User> passwordHasher,
-    AvatarCatalogService avatarCatalog) : ControllerBase
+    AvatarCatalogService avatarCatalog,
+    IEmailNotificationService emailNotifications) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<ProfileResponse>> Get(CancellationToken cancellationToken)
@@ -78,6 +80,11 @@ public sealed class ProfileController(
 
         user.PasswordHash = passwordHasher.HashPassword(user, request.NewPassword);
         await db.SaveChangesAsync(cancellationToken);
+        await emailNotifications.NotifyPasswordChangedAsync(
+            user.Name,
+            user.Email,
+            DateTime.UtcNow,
+            cancellationToken);
 
         return NoContent();
     }
